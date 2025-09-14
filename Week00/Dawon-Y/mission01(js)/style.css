@@ -1,0 +1,136 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    border-radius: 12px;
+    padding: 32px;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    margin-bottom: 8rem;
+}
+
+.divider {
+    width: 80%;
+    height: 3px;
+    background-color: #e0e7ff;
+    margin: 0 auto 1.5rem;
+}
+
+.input-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+#todo-input {
+    width: 50%;
+    padding: 16px 16px;
+    border-radius: 3PX;
+    border: 3px solid #262626;
+    font-size: 1rem;
+    outline: none;
+}
+
+#todo-input::placeholder {
+    font-style: italic;
+}
+
+#todo-input:focus {
+    border-color: rgb(22, 104, 218);
+}
+
+.todo-list-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 70%;
+    margin: 0 auto;
+}
+
+.list-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.list-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 1.5rem;
+    padding-bottom: 5px;
+    border-bottom: 4px solid #d2dcff;
+    display: inline-block;
+    width: fit-content;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    max-width: 300px;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 4px solid #e2e8f0;
+    margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.list-item.completed {
+    background-color: #e0e7ff;
+    border-color: #c7d2fe;
+}
+
+.item-text {
+    flex-grow: 1;
+    font-size: 1rem;
+    color: #4a5568;
+    word-break: break-word;
+    text-align: left;
+}
+
+.list-item.completed .item-text {
+    text-decoration: line-through;
+    color: #6b7280;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.button {
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border: none;
+    white-space: nowrap;
+}
+
+.complete-btn {
+    background-color: #c6d1ff;
+}
+.delete-btn {
+    background-color: #c6d1ff;
+}
