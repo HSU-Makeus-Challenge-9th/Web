@@ -1,3 +1,4 @@
+/* 전체 페이지 */
 body {
   width: 100vw;
   height: 100vh;
@@ -7,6 +8,7 @@ body {
   background: lightcyan;
 }
 
+/* 메인 컨테이너 */
 main {
   background: white;
   border-radius: 12px;
@@ -17,12 +19,14 @@ main {
   width: fit-content;
 }
 
+/* 타이틀 */
 header {
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 1.2rem;
 }
 
+/* 입력 영역 */
 .input-section {
   display: flex;
   gap: 0.8rem;
@@ -30,6 +34,7 @@ header {
   align-items: stretch;
 }
 
+/* 텍스트 입력 필드 */
 input {
   flex: 8;
   padding: 0.8rem 1rem;
@@ -43,6 +48,7 @@ input::placeholder {
   color: lightgray;
 }
 
+/* 할 일 목록 컨테이너 */
 .container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -51,17 +57,20 @@ input::placeholder {
   text-align: left;
 }
 
+/* 섹션 제목 */
 h2 {
   font-size: 1rem;
   font-weight: bold;
   text-align: center;
 }
 
+/* 리스트 기본 설정 */
 ul {
   list-style: none;
   padding: 0;
 }
 
+/* 할 일 아이템 */
 li {
   display: flex;
   justify-content: space-between;
@@ -72,6 +81,7 @@ li {
   border-radius: 6px;
 }
 
+/* 추가 버튼 */
 .add-button {
   flex: 2;
   padding: 0.8rem 1rem;
@@ -84,6 +94,7 @@ li {
   font-size: 1rem;
 }
 
+/* 완료 버튼 */
 button.complete {
   border: none;
   padding: 0.4rem 1rem;
@@ -94,6 +105,7 @@ button.complete {
   cursor: pointer;
 }
 
+/* 삭제 버튼 */
 button.delete {
   border: none;
   padding: 0.4rem 1rem;
