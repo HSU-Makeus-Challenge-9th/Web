@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YANG TODO</title>
+    <link rel="stylesheet" href="./src/style.css">
+    <script type="module" src="./dist/script.js"></script>
+</head>
+<body>
+    <section class="container">
+        <h1 class="title">YANG TODO</h1>
+        <div class="divider"></div>
+        
+        <div class="input-container">
+            <input type="text" id="todo-input" placeholder="할 일 입력">
+            <button id="add-button" class="add-button">추가</button>
+        </div>
+        
+        <section class="todo-list-section">
+            <div class="list-container">
+                <h2 class="list-title">해야 할 일</h2>
+                <ul id="todo-list" class="todo-list"></ul>
+            </div>
+            
+            <div class="list-container">
+                <h2 class="list-title">해낸 일</h2>
+                <ul id="completed-list" class="completed-list"></ul>
+            </div>
+        </section>
+    </section>
+
+</body>
+</html>
