@@ -1,3 +1,10 @@
+/*전역으로 박스 사이즈 설정하기...!!!*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -29,7 +36,6 @@ input[type="text"] {
   font-size: 16px;
   border: 2px solid lightblue;
   border-radius: 8px;
-  box-sizing: border-box;
   margin-bottom: 30px;
 }
 
