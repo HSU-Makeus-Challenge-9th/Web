@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>UMC Study Plan</title>
+  <style>
+    :root{
+      --bg:#eef3f8;
+      --line:#d9e1ea;
+      --ink:#0f172a;
+      --muted:#95a0ad;
+      --btn:#e7edf4;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui, sans-serif}
+
+    .wrap{width: 960px; margin: 64px auto}
+    h1{margin:0 0 28px; text-align:center; font-size:48px; font-weight:800}
+    hr{width:100%; border:0; border-top:2px solid var(--line); margin:0 0 20px}
+
+    /* 입력창 */
+    .input{
+      display:block; width: 720px; height: 48px;
+      margin: 20px auto 28px; padding: 0 16px;
+      border: 2px solid #333; border-radius: 6px; font-size:16px;
+      background:#fff;
+    }
+    .input::placeholder{color:var(--muted); font-size:14px}
+
+    /* 2컬럼 레이아웃 */
+    .cols{display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:start}
+    .col h3{margin:0 0 8px; text-align:center; font-size:18px; font-weight:800; text-decoration:underline; text-underline-offset:6px}
+
+    /* 리스트 */
+    ul{list-style:none; margin:0; padding:0}
+    li.item{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 8px;
+      border-bottom:3px solid var(--line);
+    }
+    .txt{max-width:70%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600}
+    .btn{padding:4px 10px; border:0; background:var(--btn); color:#374151; border-radius:4px; cursor:pointer}
+    .btn:hover{filter:brightness(0.96)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>UMC Study Plan</h1>
+    <hr>
+    <input id="input" class="input" type="text" placeholder="스터디 계획을 작성해보세요!" />
+
+    <div class="cols">
+      <div class="col">
+        <h3>해야 할 일</h3>
+        <ul id="todo"></ul>
+      </div>
+      <div class="col">
+        <h3>해낸 일</h3>
+        <ul id="done"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $todo  = document.getElementById('todo');
+    const $done  = document.getElementById('done');
+
+    // 초기 데모 아이템(원하면 지워)
+    const seedTodo = [];
+    const seedDone = [];
+
+    seedTodo.forEach(t => addTo($todo, t, 'done'));
+    seedDone.forEach(t => addTo($done, t, 'del'));
+
+    // 입력 → Enter로 추가
+    $input.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){
+        const v = $input.value.trim();
+        if(!v) return;
+        addTo($todo, v, 'done');
+        $input.value = '';
+      }
+    });
+
+    // 두 리스트 모두 이벤트 위임
+    document.body.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button[data-act]');
+      if(!btn) return;
+      const li  = btn.closest('li.item');
+      const text= li.querySelector('.txt').textContent;
+
+      if(btn.dataset.act === 'done'){
+        li.remove();
+        addTo($done, text, 'del');
+      }
+      if(btn.dataset.act === 'del'){
+        li.remove();
+      }
+    });
+
+    function addTo(listEl, text, action){
+      const li = document.createElement('li');
+      li.className = 'item';
+      li.innerHTML = `
+        <span class="txt">${escapeHtml(text)}</span>
+        <button class="btn" data-act="${action}">${action === 'done' ? '완료' : '삭제'}</button>
+      `;
+      listEl.appendChild(li);
+    }
+
+    // XSS 막기
+    function escapeHtml(s){
+      return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+  </script>
+</body>
+</html>
