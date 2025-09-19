@@ -1,0 +1,37 @@
+    :root{
+      --bg:#eef3f8;
+      --line:#d9e1ea;
+      --ink:#0f172a;
+      --muted:#95a0ad;
+      --btn:#e7edf4;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui, sans-serif}
+
+    .wrap{width: 960px; margin: 64px auto}
+    h1{margin:0 0 28px; text-align:center; font-size:48px; font-weight:800}
+    hr{width:100%; border:0; border-top:2px solid var(--line); margin:0 0 20px}
+
+    /* 입력창 */
+    .input{
+      display:block; width: 720px; height: 48px;
+      margin: 20px auto 28px; padding: 0 16px;
+      border: 2px solid #333; border-radius: 6px; font-size:16px;
+      background:#fff;
+    }
+    .input::placeholder{color:var(--muted); font-size:14px}
+
+    /* 2컬럼 레이아웃 */
+    .cols{display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:start}
+    .col h3{margin:0 0 8px; text-align:center; font-size:18px; font-weight:800; text-decoration:underline; text-underline-offset:6px}
+
+    /* 리스트 */
+    ul{list-style:none; margin:0; padding:0}
+    li.item{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 8px;
+      border-bottom:3px solid var(--line);
+    }
+    .txt{max-width:70%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600}
+    .btn{padding:4px 10px; border:0; background:var(--btn); color:#374151; border-radius:4px; cursor:pointer}
+    .btn:hover{filter:brightness(0.96)}
