@@ -7,7 +7,6 @@ $taskInput.addEventListener("keydown", (e) => {
     addTodo();
   }
 });
-
 function addTodo() {
   const task = $taskInput.value.trim();
   if (!task) return;
