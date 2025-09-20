@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>UMC Study Plan</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0 20px 20px;
+      text-align: center;
+      background-color: #f2f2f2;
+    }
+    header {
+      font-size: 36px;
+      font-weight: bold;
+      margin: 4rem;
+    }
+    input {
+      width: 60%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    section {
+      margin-top: 20px;
+      display: inline-block;
+      width: 40%;
+      vertical-align: top;
+    }
+    h2 {
+      font-size: 18px;
+      display: inline-block;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 2px solid #ccc; 
+    }
+    button {
+      border: none;
+      padding: 4px 8px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .done-btn { background: green; color: white; }
+    .delete-btn { background: red; color: white; }
+  </style>
+</head>
+<body>
+  <header>UMC Study Plan</header>
+  <hr>
+  <input id="taskInput" type="text" placeholder="스터디 계획을 작성해보세요!" />
+  
+  <section>
+    <h2>해야 할 일</h2>
+    <ul id="todoList"></ul>
+  </section>
+
+  <section>
+    <h2>해낸 일</h2>
+    <ul id="doneList"></ul>
+  </section>
+
+  <script>
+    const input = document.getElementById('taskInput');
+    const todoList = document.getElementById('todoList');
+    const doneList = document.getElementById('doneList');
+
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') addTodo();
+    });
+
+    function addTodo() {
+      const text = input.value.trim();
+      if (!text) return;
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${text}</span> <button class="done-btn">완료</button>`;
+      li.querySelector('button').addEventListener('click', () => completeTask(li, text));
+      todoList.appendChild(li);
+      input.value = '';
+    }
+
+    function completeTask(li, text) {
+      li.remove();
+      const doneItem = document.createElement('li');
+      doneItem.innerHTML = `<span>${text}</span> <button class="delete-btn">삭제</button>`;
+      doneItem.querySelector('button').addEventListener('click', () => doneItem.remove());
+      doneList.appendChild(doneItem);
+    }
+  </script>
+</body>
+</html>
