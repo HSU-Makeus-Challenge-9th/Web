@@ -1,11 +1,6 @@
 import clsx from 'clsx';
-import useTheme from '../contexts/useTheme.ts';
 
 function ThemeContent() {
-  const { theme } = useTheme();
-
-  // 현재 테마가 라이트 모드인지 확인
-  const isLightMode = theme === 'light';
 
   return (
     <div
