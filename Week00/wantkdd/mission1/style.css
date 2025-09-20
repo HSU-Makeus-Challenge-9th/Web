@@ -1,0 +1,74 @@
+body {
+  padding: 10vw;
+  text-align: center;
+  background-color: lightcyan;
+}
+
+header {
+  font-size: 4rem;
+  font-weight: bold;
+  margin-bottom: 10vh;
+}
+
+hr {
+  border: 2px solid lightskyblue;
+}
+
+input {
+  width: 80%;
+  padding: 1rem;
+  font-size: 1rem;
+  margin-top: 1vh;
+  border: 2px solid black;
+}
+
+input::placeholder {
+  font-style: italic;
+  color: gray;
+}
+
+#container {
+  display: flex;
+  justify-content: center;
+  gap: 10vw;
+  margin-top: 1vh;
+}
+
+h2 {
+  font-size: 2rem;
+  display: inline-block;
+  border-bottom: 2px solid lightblue;
+  margin-bottom: 1vh;
+}
+
+section {
+  width: 10vw;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  width: 10vw;
+  margin-bottom: 1vh;
+  padding-bottom: 1vh;
+  border-bottom: 2px solid lightblue;
+}
+
+button {
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+span {
+  flex: 1;
+  text-align: left;
+  margin-right: 1rem;
+}
