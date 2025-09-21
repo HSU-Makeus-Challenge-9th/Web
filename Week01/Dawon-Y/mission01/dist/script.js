@@ -1,11 +1,11 @@
 "use strict";
 class TodoApp {
-    constructor() {
+    constructor(todoInput, addButton, todoList, completedList) {
         this.todos = [];
-        this.$todoInput = document.querySelector('#todo-input');
-        this.$addButton = document.querySelector('#add-button');
-        this.$todoList = document.querySelector('#todo-list');
-        this.$completedList = document.querySelector('#completed-list');
+        this.$todoInput = todoInput;
+        this.$addButton = addButton;
+        this.$todoList = todoList;
+        this.$completedList = completedList;
         this.init();
         this.render();
     }
@@ -108,4 +108,14 @@ class TodoApp {
         }
     }
 }
-new TodoApp();
+function initializeTodoApp() {
+    const todoInput = document.querySelector('#todo-input');
+    const addButton = document.querySelector('#add-button');
+    const todoList = document.querySelector('#todo-list');
+    const completedList = document.querySelector('#completed-list');
+    if (!todoInput || !addButton || !todoList || !completedList) {
+        return;
+    }
+    new TodoApp(todoInput, addButton, todoList, completedList);
+}
+document.addEventListener('DOMContentLoaded', initializeTodoApp);

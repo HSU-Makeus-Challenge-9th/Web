@@ -144,7 +144,6 @@ class TodoApp {
         if (incompleteTodos.length === 0) {
             const emptyMessage = document.createElement('li');
             emptyMessage.className = 'empty-message';
-            emptyMessage.textContent = '할 일을 추가해보세요!';
             this.$todoList.appendChild(emptyMessage);
         } else {
             incompleteTodos.forEach(todo => {
@@ -157,7 +156,6 @@ class TodoApp {
         if (completedTodos.length === 0) {
             const emptyMessage = document.createElement('li');
             emptyMessage.className = 'empty-message';
-            emptyMessage.textContent = '완료된 할 일이 없습니다.';
             this.$completedList.appendChild(emptyMessage);
         } else {
             completedTodos.forEach(todo => {
@@ -177,12 +175,11 @@ function initializeTodoApp(): void {
 
     // null 체크
     if (!todoInput || !addButton || !todoList || !completedList) {
-        console.error('필요한 DOM 요소를 찾을 수 없습니다.');
         return;
     }
 
     // 의존성 주입을 통한 앱 초기화
-    const app = new TodoApp(
+    new TodoApp(
         todoInput,
         addButton,
         todoList,
