@@ -7,9 +7,9 @@ $taskInput.addEventListener("keydown", (e) => {
     addTodo();
   }
 });
-
 function addTodo() {
-  const task = taskInput.value.trim();
+  const task = $taskInput.value.trim();
+
   if (!task) return;
 
   const li = document.createElement("li");
@@ -21,6 +21,7 @@ function addTodo() {
   completeBtn.addEventListener("click", () => completeTodo(li));
 
   li.append(span, completeBtn);
+
   $todoList.appendChild(li);
 
   $taskInput.value = "";
