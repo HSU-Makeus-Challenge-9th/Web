@@ -1,8 +1,8 @@
 // 1. HTML 요소 선택
-const todoInput = document.getElementById("todo-input") as HTMLInputElement;
-const todoForm = document.getElementById("todo-form") as HTMLFormElement;
-const todoList = document.getElementById("todo-list") as HTMLUListElement;
-const doneList = document.getElementById("done-list") as HTMLUListElement;
+const $todoInput = document.getElementById("todo-input") as HTMLInputElement;
+const $todoForm = document.getElementById("todo-form") as HTMLFormElement;
+const $todoList = document.getElementById("todo-list") as HTMLUListElement;
+const $doneList = document.getElementById("done-list") as HTMLUListElement;
 
 // 2. 할 일이 어떻게 생긴애인지 Type을 정의
 type Todo = {
@@ -15,29 +15,29 @@ let doneTasks: Todo[] = [];
 
 // - 할 일 목록 랜더링 하는 함수를 정의
 const renderTasks = (): void => {
-  todoList.innerHTML = "";
-  doneList.innerHTML = "";
+  $todoList.innerHTML = "";
+  $doneList.innerHTML = "";
 
   todos.forEach((todo): void => {
     const li = createTodoElement(todo, false);
-    todoList.appendChild(li);
+    $todoList.appendChild(li);
   });
 
   doneTasks.forEach((todo): void => {
     const li = createTodoElement(todo, true);
-    doneList.appendChild(li);
+    $doneList.appendChild(li);
   });
 };
 
 // 3. 할 일 텍스트 입력 처리 함수. (공백 잘라줌)
 const getTodoText = (): string => {
-  return todoInput.value.trim();
+  return $todoInput.value.trim();
 };
 
 // 4. 할 일 추가 처리 함수
 const addTodo = (text: string): void => {
   todos.push({ id: Date.now(), text });
-  todoInput.value = "";
+  $todoInput.value = "";
   renderTasks();
 };
 
@@ -83,7 +83,7 @@ const createTodoElement = (todo: Todo, isDone: boolean): HTMLLIElement => {
   return li;
 };
 // 8. 폼 제출 이벤트 리스너
-todoForm.addEventListener("submit", (event: Event): void => {
+$todoForm.addEventListener("submit", (event: Event): void => {
   event.preventDefault();
   const text = getTodoText();
   if (text) {
