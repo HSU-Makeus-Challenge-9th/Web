@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex Layout Design</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- BEM 방법론 적용한 레이아웃 구조 -->
+    <div class="layout">
+        <!-- Header Block -->
+        <header class="layout__header">
+            <div class="header__left">
+                HEADER
+            </div>
+            <div class="header__right">
+                MENU
+            </div>
+        </header>
+
+        <!-- Hero Block -->
+        <section class="layout__hero">
+            HERO
+        </section>
+
+        <!-- Content Block -->
+        <main class="layout__content">
+            <div class="content__main">
+                MAIN
+            </div>
+            <div class="content__space">
+                <!-- 공백 영역 -->
+            </div>
+            <div class="content__image">
+                IMAGE
+            </div>
+            <div class="content__extra">
+                EXTRA
+            </div>
+        </main>
+
+        <!-- Banner Block -->
+        <footer class="layout__banner">
+            BANNER
+        </footer>
+    </div>
+</body>
+</html>

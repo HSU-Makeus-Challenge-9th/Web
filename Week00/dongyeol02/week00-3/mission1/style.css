@@ -1,0 +1,112 @@
+/*전역으로 박스 사이즈 설정하기...!!!*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background-color: rgb(200, 229, 247);
+}
+
+#main-container {
+  text-align: center;
+  width: 1000px;
+  max-width: 90%;
+  padding: 20px;
+}
+
+header {
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: 100px;
+}
+
+input[type="text"] {
+  width: 100%;
+  height: 60px;
+  padding: 0 15px;
+  font-size: 16px;
+  border: 2px solid lightblue;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+#section-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 30px;
+  padding: 0;
+}
+
+section {
+  flex: 1;
+  background: white;
+  border: 2px solid lightblue;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 300px;
+}
+
+button {
+  width: 50px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  padding: 0;
+  background-color: rgb(201, 229, 255);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.section-header {
+  padding: 15px;
+  margin: 0;
+}
+
+.section-header-span {
+  font-size: 18px;
+  font-weight: bold;
+  border-bottom: solid 2px lightblue;
+}
+
+.section-content {
+  padding: 20px;
+  text-align: left;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  background: #f8f9fa;
+  margin: 10px 0;
+  padding: 12px 15px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.empty-state {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
