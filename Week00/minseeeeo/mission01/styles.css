@@ -1,0 +1,78 @@
+body {
+    background-color: #ecf0f6;
+}
+
+.container {
+    width: 70%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    width: 100%;
+}
+
+.title {
+    text-align: center;
+    margin: 80px 0;
+}
+
+hr {
+    border: none;
+    background-color: lightgray;
+    height: 2px;
+}
+
+.input-styled {
+    width: 80%;
+    padding: 12px;
+    margin-top: 10px;
+}
+
+.input-styled::placeholder {
+    font-style: italic;
+    color: lightgray;
+}
+
+.todo-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+}
+
+.todo-container p {
+    text-align: center;
+
+}
+
+.todo-title,
+.done-title {
+    font-weight: bold;
+    text-decoration: underline;
+    text-decoration-color: lightgray;
+    margin-bottom: 50px;
+}
+
+.todo-item {
+    width: 45%;
+    padding: 10px;
+    margin: 5px auto;
+    border-bottom: 2px solid lightgray;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.todo-text {
+    font-weight: bold;
+}
+
+.done-btn {
+    background-color: #d3ddfe;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
