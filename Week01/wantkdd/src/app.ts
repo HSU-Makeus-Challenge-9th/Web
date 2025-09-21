@@ -1,10 +1,11 @@
-const $input = document.querySelector('.input-section input');
-const $todoList = document.querySelector('.todo');
-const $doneList = document.querySelector('.done');
-const $addButton = document.querySelector('.add-button');
+const $input = document.querySelector('#todo-input');
+const $todoList = document.querySelector('#todo-list');
+const $doneList = document.querySelector('#done-list');
+const $addButton = document.querySelector('.todo-container__button');
+const $todoForm = document.querySelector('#todo-form');
 
 // 타입 가드(DOM 요소가 없을 경우 에러 처리)
-if (!$input || !$todoList || !$doneList || !$addButton) {
+if (!$input || !$todoList || !$doneList || !$addButton || !$todoForm) {
   throw new Error('DOM 요소가 없음');
 }
 
@@ -13,15 +14,25 @@ const input = $input as HTMLInputElement;
 const todoList = $todoList as HTMLUListElement;
 const doneList = $doneList as HTMLUListElement;
 const addButton = $addButton as HTMLButtonElement;
+const todoForm = $todoForm as HTMLFormElement;
 
 // 이벤트 리스너 등록
+todoForm.addEventListener('submit', function (e: Event) {
+  e.preventDefault();
+  addTodo();
+});
+
 input.addEventListener('keydown', function (e: KeyboardEvent) {
   if (e.key === 'Enter' && !e.isComposing) {
+    e.preventDefault();
     addTodo();
   }
 });
 
-addButton.addEventListener('click', addTodo);
+addButton.addEventListener('click', function (e: Event) {
+  e.preventDefault();
+  addTodo();
+});
 
 // 할 일 목록 렌더링
 function loadTodos(): void {
@@ -34,13 +45,15 @@ function loadTodos(): void {
   // 해야할 일 렌더링
   todos.forEach((todo) => {
     const li = document.createElement('li');
+    li.className = 'render-container__item';
 
     const span = document.createElement('span');
+    span.className = 'render-container__item-text';
     span.textContent = todo;
 
     const button = document.createElement('button');
     button.textContent = '완료';
-    button.className = 'complete';
+    button.className = 'render-container__item-button';
     button.addEventListener('click', () => completeTodo(todo));
 
     li.appendChild(span);
@@ -51,14 +64,15 @@ function loadTodos(): void {
   // 해낸 일 렌더링
   dones.forEach((todo) => {
     const li = document.createElement('li');
+    li.className = 'render-container__item';
 
     const span = document.createElement('span');
+    span.className = 'render-container__item-text';
     span.textContent = todo;
-    span.className = 'done';
 
     const button = document.createElement('button');
     button.textContent = '삭제';
-    button.className = 'delete';
+    button.className = 'render-container__item-button';
     button.addEventListener('click', () => {
       const newDones = dones.filter((done) => done !== todo);
       localStorage.setItem('dones', JSON.stringify(newDones));
