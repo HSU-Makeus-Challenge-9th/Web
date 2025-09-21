@@ -6,13 +6,13 @@ interface Todo {
 
 let todos: Todo[] = [];
 
-const qs = <T extends Element>(sel: string): T =>
-  document.querySelector(sel)! as T;
+const selectElement = <T extends Element>(selector: string): T =>
+  document.querySelector(selector)! as T;
 
-const input = qs<HTMLInputElement>(".todo__input");
-const addBtn = qs<HTMLButtonElement>(".todo__add-btn");
-const todoList = qs<HTMLUListElement>(".todo__list--todo");
-const doneList = qs<HTMLUListElement>(".todo__list--done");
+const input = selectElement<HTMLInputElement>(".todo__input");
+const addBtn = selectElement<HTMLButtonElement>(".todo__add-btn");
+const todoList = selectElement<HTMLUListElement>(".todo__list--todo");
+const doneList = selectElement<HTMLUListElement>(".todo__list--done");
 
 const createItem = (todo: Todo) => {
   const li = document.createElement("li");
