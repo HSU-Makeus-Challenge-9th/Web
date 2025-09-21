@@ -13,12 +13,17 @@ class TodoApp {
     private $todoList: HTMLUListElement;
     private $completedList: HTMLUListElement;
 
-    constructor() {
-        // DOM 요소들 가져오기 ($ 접두사 사용)
-        this.$todoInput = document.querySelector('#todo-input') as HTMLInputElement;
-        this.$addButton = document.querySelector('#add-button') as HTMLButtonElement;
-        this.$todoList = document.querySelector('#todo-list') as HTMLUListElement;
-        this.$completedList = document.querySelector('#completed-list') as HTMLUListElement;
+    constructor(
+        todoInput: HTMLInputElement,
+        addButton: HTMLButtonElement,
+        todoList: HTMLUListElement,
+        completedList: HTMLUListElement
+    ) {
+        // DOM 요소들을 매개변수로 받아 의존성 주입
+        this.$todoInput = todoInput;
+        this.$addButton = addButton;
+        this.$todoList = todoList;
+        this.$completedList = completedList;
 
         // 이벤트 리스너 연결
         this.init();
@@ -139,6 +144,7 @@ class TodoApp {
         if (incompleteTodos.length === 0) {
             const emptyMessage = document.createElement('li');
             emptyMessage.className = 'empty-message';
+            emptyMessage.textContent = '할 일을 추가해보세요!';
             this.$todoList.appendChild(emptyMessage);
         } else {
             incompleteTodos.forEach(todo => {
@@ -151,6 +157,7 @@ class TodoApp {
         if (completedTodos.length === 0) {
             const emptyMessage = document.createElement('li');
             emptyMessage.className = 'empty-message';
+            emptyMessage.textContent = '완료된 할 일이 없습니다.';
             this.$completedList.appendChild(emptyMessage);
         } else {
             completedTodos.forEach(todo => {
@@ -161,5 +168,27 @@ class TodoApp {
     }
 }
 
-// 앱 초기화
-new TodoApp();
+// DOM 요소들을 가져와서 앱 초기화
+function initializeTodoApp(): void {
+    const todoInput = document.querySelector('#todo-input') as HTMLInputElement;
+    const addButton = document.querySelector('#add-button') as HTMLButtonElement;
+    const todoList = document.querySelector('#todo-list') as HTMLUListElement;
+    const completedList = document.querySelector('#completed-list') as HTMLUListElement;
+
+    // null 체크
+    if (!todoInput || !addButton || !todoList || !completedList) {
+        console.error('필요한 DOM 요소를 찾을 수 없습니다.');
+        return;
+    }
+
+    // 의존성 주입을 통한 앱 초기화
+    const app = new TodoApp(
+        todoInput,
+        addButton,
+        todoList,
+        completedList
+    );
+}
+
+// DOM이 로드된 후 앱 초기화
+document.addEventListener('DOMContentLoaded', initializeTodoApp);
