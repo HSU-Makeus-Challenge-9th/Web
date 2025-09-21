@@ -1,13 +1,22 @@
-const input = document.querySelector(
-  '.input-section input'
-) as HTMLInputElement;
-const todoList = document.querySelector('.todo') as HTMLUListElement;
-const doneList = document.querySelector('.done') as HTMLUListElement;
-const addButton = document.querySelector('.add-button') as HTMLButtonElement;
+const $input = document.querySelector('.input-section input');
+const $todoList = document.querySelector('.todo');
+const $doneList = document.querySelector('.done');
+const $addButton = document.querySelector('.add-button');
+
+// 타입 가드(DOM 요소가 없을 경우 에러 처리)
+if (!$input || !$todoList || !$doneList || !$addButton) {
+  throw new Error('DOM 요소가 없음');
+}
+
+// 강제 타입 단언 대신 안전하게 캐스팅
+const input = $input as HTMLInputElement;
+const todoList = $todoList as HTMLUListElement;
+const doneList = $doneList as HTMLUListElement;
+const addButton = $addButton as HTMLButtonElement;
 
 // 이벤트 리스너 등록
-input.addEventListener('keypress', function (e: KeyboardEvent) {
-  if (e.key === 'Enter') {
+input.addEventListener('keydown', function (e: KeyboardEvent) {
+  if (e.key === 'Enter' && !e.isComposing) {
     addTodo();
   }
 });
@@ -25,22 +34,39 @@ function loadTodos(): void {
   // 해야할 일 렌더링
   todos.forEach((todo) => {
     const li = document.createElement('li');
-    li.innerHTML = `<span>${todo}</span> <button class="complete">완료</button>`;
-    li.querySelector('.complete')!.addEventListener('click', () =>
-      completeTodo(todo)
-    );
+
+    const span = document.createElement('span');
+    span.textContent = todo;
+
+    const button = document.createElement('button');
+    button.textContent = '완료';
+    button.className = 'complete';
+    button.addEventListener('click', () => completeTodo(todo));
+
+    li.appendChild(span);
+    li.appendChild(button);
     todoList.appendChild(li);
   });
 
   // 해낸 일 렌더링
   dones.forEach((todo) => {
     const li = document.createElement('li');
-    li.innerHTML = `<span class="done">${todo}</span> <button class="delete">삭제</button>`;
-    li.querySelector('.delete')!.addEventListener('click', () => {
+
+    const span = document.createElement('span');
+    span.textContent = todo;
+    span.className = 'done';
+
+    const button = document.createElement('button');
+    button.textContent = '삭제';
+    button.className = 'delete';
+    button.addEventListener('click', () => {
       const newDones = dones.filter((done) => done !== todo);
       localStorage.setItem('dones', JSON.stringify(newDones));
       loadTodos();
     });
+
+    li.appendChild(span);
+    li.appendChild(button);
     doneList.appendChild(li);
   });
 }
