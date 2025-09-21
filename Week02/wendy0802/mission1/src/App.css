@@ -1,0 +1,141 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.TodoContainer {
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 800px;
+  padding: 2rem;
+  min-height: auto;
+}
+
+.inputGroup {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.input {
+  flex: 1;
+  max-width: 400px;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid lightgray;
+  padding: 0 1rem;
+  outline: none;
+  font-size: 1rem;
+}
+
+.input[type="text"]:focus {
+  border: 0.1rem solid green;
+}
+
+.addBtn {
+  border: none;
+  background-color: green;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.addBtn:hover {
+  background-color: darkgreen;
+}
+
+.Listcontainer {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.leftcontainer,
+.rightcontainer {
+  color: rgb(43, 43, 43);
+  flex: 1;
+  min-height: 200px;
+}
+
+.leftcontainer p,
+.rightcontainer p {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.completeBtn {
+  background-color: green;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-right: 0.6rem;
+}
+
+.completeBtn:hover {
+  background-color: darkgreen;
+}
+
+.deleteBtn {
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.deleteBtn:hover {
+  background-color: darkred;
+}
+
+.todoList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.TodoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: white;
+  border-radius: 1rem;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.TodoText {
+  flex: 1;
+  cursor: pointer;
+  margin-right: 1rem;
+  text-align: left;
+  font-size: 1rem;
+  padding: 0.5rem 0;
+}
+
+.TodoText.completed {
+  text-decoration: line-through;
+  color: #666;
+}
