@@ -11,8 +11,13 @@ loadTodos();
 
 // input 이벤트 리스너(엔터)
 $input.addEventListener("keypress", (event: KeyboardEvent) => {
-  if (event.key === "Enter" && $input.value.trim() !== "") {
-    addTodo($input.value.trim());
+  if (event.key === "Enter") {
+    const value = $input.value.trim();
+    if (value == "") {
+      alert("할 일을 입력해주세요!");
+      return;
+    }
+    addTodo(value);
     $input.value = "";
   }
 });

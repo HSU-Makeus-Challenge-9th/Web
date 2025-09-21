@@ -7,8 +7,13 @@ if (!$input || !$todoList || !$doneList) {
 }
 loadTodos();
 $input.addEventListener("keypress", (event) => {
-    if (event.key === "Enter" && $input.value.trim() !== "") {
-        addTodo($input.value.trim());
+    if (event.key === "Enter") {
+        const value = $input.value.trim();
+        if (value == "") {
+            alert("할 일을 입력해주세요!");
+            return;
+        }
+        addTodo(value);
         $input.value = "";
     }
 });
