@@ -1,0 +1,114 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;             /* content 크기 고정 */
+}
+
+body{
+    font-family: "Roboto", sans-serif;
+    display: flex;
+    justify-content: center;            /* 가로 정렬 */
+    align-items: center;                /* 세로 정렬 */
+    height: 100vh;                      /* 세로축 100퍼 가용 */
+    background-color: antiquewhite;
+}
+
+.todo-container{
+    background-color: burlywood;
+    padding: 20px;
+    border-radius: 5px;                 /* 모서리 처리 */
+    box-shadow: 0 4px 10px #00000080;
+    width: 350px;
+    text-align: center;
+}
+
+.todo-container_header{
+    font-size: 24px;
+    margin-bottom: 16px;
+}
+
+.todo-container_form{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;   
+}
+
+.todo-container_input{
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.todo-container_button{
+    background-color: darkgreen;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.todo-container_button:hover{
+    background-color: lightgreen;
+}
+
+.render-container{
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.render-container_title{
+    font-size: 18px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.render-container_section{
+    width: 100%;
+    text-align: left;
+}
+
+.render-container_item-text{
+    flex: 1;
+}
+.render-container_list{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+   
+}
+
+.render-container_item-button{
+    background-color: lightcoral;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 12px;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+
+}
+
+.render-container_item-button:hover{
+    background-color: #c82333;
+}
+
+.render-container_item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    width: 100%;
+}
