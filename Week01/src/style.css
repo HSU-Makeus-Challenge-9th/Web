@@ -1,3 +1,4 @@
+
 /* 전체 페이지 */
 body {
   width: 100vw;
@@ -114,4 +115,5 @@ button.delete {
   color: white;
   font-size: 1rem;
   cursor: pointer;
+
 }
