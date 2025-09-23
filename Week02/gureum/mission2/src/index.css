@@ -1,0 +1,14 @@
+@import "tailwindcss";
+/* light/dark body 배경 */
+.light-body { background: #f0f4f8; color: #111; }
+.dark-body { background: #0f172a; color: #e2e8f0; }
+
+/* 레이아웃 유틸: 페이지 센터링 */
+html, body { height: 100%; }
+/* #root가 전체 뷰포트 높이를 가지면서 자식(main)을 중앙 정렬 */
+#root { min-height: 100vh; display: grid; place-items: center; }
+body { margin: 0; }
+
+/* todo 섹션 레이아웃: 작은 화면 1열, 그 외 2열 */
+.todo-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 40rem) { .todo-sections { grid-template-columns: 1fr; } }
