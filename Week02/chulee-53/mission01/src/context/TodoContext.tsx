@@ -21,7 +21,9 @@ export const TodoProvider = ({ children }: PropsWithChildren) => {
   const [doneTodos, setDoneTodos] = useState<TTodo[]>([]);
 
   const addTodo = (text: string): void => {
-    const newTodo: TTodo = { id: Date.now(), text };
+    const trimmedText = text.trim();
+    if(!trimmedText) return; // 공백만 입력된 경우 무시
+    const newTodo: TTodo = { id: crypto.randomUUID(), text: trimmedText };
     setTodos((prevTodos): TTodo[] => [...prevTodos, newTodo]);
   };
 
