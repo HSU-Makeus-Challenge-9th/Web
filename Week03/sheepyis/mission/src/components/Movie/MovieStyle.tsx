@@ -1,12 +1,17 @@
+export const MovieRootContainer = `
+  w-full h-full flex flex-col items-center
+`;
+
 export const MovieListContainer = `
   w-[95%] grid grid-cols-6 gap-6
 `;
+
 export const MovieItemContainer = `
     relative group w-full h-full cursor-pointer rounded-2xl
 `;
 
 export const MovieItemImg = `
-    w-full h-full rounded-2xl
+    w-full h-full rounded-2xl bg-gray-400
 `;
 
 // MovieOverlay.tsx

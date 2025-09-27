@@ -6,3 +6,10 @@ export interface Movie {
   release_date?: string;
   vote_average?: number;
 }
+
+export interface PaginatedResponse<T> {
+  page: number;
+  total_pages: number;
+  total_results: number;
+  results: T[];
+}

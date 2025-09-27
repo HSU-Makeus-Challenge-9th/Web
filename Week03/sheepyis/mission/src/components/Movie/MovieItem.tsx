@@ -9,11 +9,15 @@ interface MovieItemProps {
 const MovieItem = ({ movie }: MovieItemProps) => {
   return (
     <div className={S.MovieItemContainer}>
-      <img
-        src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
-        alt={movie.title}
-        className={S.MovieItemImg}
-      />
+      {movie.poster_path ? (
+        <img
+          src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
+          alt={movie.title}
+          className={S.MovieItemImg}
+        />
+      ) : (
+        <div className={S.MovieItemImg} />
+      )}
 
       <MovieOverlay movie={movie} />
     </div>

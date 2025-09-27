@@ -7,10 +7,12 @@ export function useFetch<T>(url: string) {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
+
     const fetchData = async () => {
       try {
         const response = await API.get<T>(`/${url}`);
-        console.log(response.data);
         setData(response.data);
       } catch (err) {
         setError(err);
