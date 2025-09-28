@@ -1,4 +1,4 @@
-import Spinner from "../Spinner/Spinner";
+import Spinner from "./Spinner/Spinner";
 import * as S from "./CommonStyle";
 
 const Loading = () => {

@@ -1,10 +1,12 @@
 export interface Movie {
   id: number;
   title: string;
-  poster_path: string;
   overview: string;
-  release_date?: string;
-  vote_average?: number;
+  poster_path: string;
+  vote_average: number;
+  release_date: string;
+  runtime: BigInteger;
+  tagline: string;
 }
 
 export interface PaginatedResponse<T> {

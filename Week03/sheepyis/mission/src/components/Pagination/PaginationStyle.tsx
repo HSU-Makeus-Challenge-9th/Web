@@ -1,11 +1,11 @@
 export const PaginationContainer = `
-    w-full flex justify-center items-center gap-[2rem] !mb-[2rem]
+    w-full flex justify-center items-center gap-5 my-5
 `;
 
 export const PaginationP = `
-    text-[2rem] font-medium
+    text-md font-bold
 `;
 
 export const PaginationButtonContainer = `
-    !px-[2rem] !py-[1rem] flex items-center justify-center !rounded-xl font-bold text-[2rem]
+    px-4 py-1 flex items-center justify-center rounded-lg font-bold text-md
 `;

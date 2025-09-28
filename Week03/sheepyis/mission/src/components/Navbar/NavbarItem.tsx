@@ -21,9 +21,7 @@ const NavbarItem = ({ item }: NavbarItemProps) => {
 
   return (
     <li
-      className={`${S.NavbarItemP} ${
-        isActive ? "text-green-600 font-bold" : "text-black"
-      }`}
+      className={`${S.NavbarItemP} ${isActive ? "font-bold" : ""}`}
       onClick={handleNavbarClick}
     >
       {item.name}

@@ -21,8 +21,8 @@ const PaginationButton = ({
         appearance-none border-0
         ${
           disabled
-            ? "!bg-gray-300 text-gray-500 cursor-not-allowed"
-            : "!bg-green-600 text-white"
+            ? "!bg-gray-500 !text-white cursor-not-allowed"
+            : "!bg-blue-900 !text-white"
         }
       `}
     >

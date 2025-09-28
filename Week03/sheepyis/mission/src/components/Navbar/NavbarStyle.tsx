@@ -1,11 +1,11 @@
 export const NavbarContainer = `
-    w-full h-[6rem]
+    w-full h-[4vw] bg-blue-900 px-5 flex items-center
 `;
 
 export const NavbarListContainer = `
-    flex gap-[4rem]
+    flex gap-5
 `;
 
 export const NavbarItemP = `
-    text-[3rem] cursor-pointer
+    text-[1.5vw] cursor-pointer text-white
 `;
