@@ -10,6 +10,11 @@ const FormAdd = () => {
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!value.trim()) {
+      alert("할 일을 입력해주세요!");
+      return;
+    }
     add(value);
     setValue("");
   };
