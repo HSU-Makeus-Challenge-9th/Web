@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useTodo } from '../context/TodoContext';
+// 새로운 할일을 추가하는 폼을 제공
+// 사용자가 텍스트를 입력하고 추가할 수 있게 함
 
 function TodoForm() {
   const [inputText, setInputText] = useState('');
