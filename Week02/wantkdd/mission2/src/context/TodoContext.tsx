@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 interface TodoContextType {
@@ -9,7 +9,9 @@ interface TodoContextType {
   deleteTodo: (text: string) => void;
 }
 // Context 생성
-const TodoContext = createContext<TodoContextType | undefined>(undefined);
+export const TodoContext = createContext<TodoContextType | undefined>(
+  undefined
+);
 
 interface TodoProviderProps {
   children: ReactNode;
@@ -63,13 +65,4 @@ export const TodoProvider: React.FC<TodoProviderProps> = ({ children }) => {
   };
 
   return <TodoContext.Provider value={value}>{children}</TodoContext.Provider>;
-};
-
-// Context 사용을 위한 커스텀 훅
-export const useTodo = () => {
-  const context = useContext(TodoContext);
-  if (context === undefined) {
-    throw new Error('useTodo must be used within a TodoProvider');
-  }
-  return context;
 };
