@@ -1,4 +1,3 @@
-
 /* 전체 페이지 */
 body {
   width: 100vw;
@@ -7,6 +6,8 @@ body {
   align-items: center;
   justify-content: center;
   background: lightcyan;
+  margin: 0;
+  font-family: Arial, sans-serif;
 }
 
 /* 메인 컨테이너 */
@@ -115,5 +116,4 @@ button.delete {
   color: white;
   font-size: 1rem;
   cursor: pointer;
-
 }
