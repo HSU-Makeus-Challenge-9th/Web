@@ -1,4 +1,4 @@
 export type TTodo = {
-    id: number;
-    text: string;
+  id: string;
+  text: string;
 };
