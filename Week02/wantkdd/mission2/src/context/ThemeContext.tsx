@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useState } from 'react';
 import type { ReactNode } from 'react';
 
 type ThemeContextType = {
@@ -6,7 +6,7 @@ type ThemeContextType = {
   toggle: () => void;
 };
 
-const ThemeContext = createContext<ThemeContextType>({
+export const ThemeContext = createContext<ThemeContextType>({
   isDark: false,
   toggle: () => {},
 });
@@ -24,12 +24,4 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       {children}
     </ThemeContext.Provider>
   );
-};
-
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme은 ThemeProvider 안에서만 쓸 수 있음');
-  }
-  return context;
 };
