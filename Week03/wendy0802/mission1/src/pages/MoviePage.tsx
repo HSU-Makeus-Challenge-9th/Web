@@ -15,7 +15,7 @@ export default function MoviePage() {
           },
         }
       );
-      const data: MovieResponse = await res.json();
+      const data: MovieResponse = await res.json(); 
       setMovies(data.results);
     };
     fetchPopular();
