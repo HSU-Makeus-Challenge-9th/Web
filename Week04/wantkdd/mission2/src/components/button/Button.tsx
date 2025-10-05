@@ -14,12 +14,15 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const base =
-    'rounded px-4 py-2 font-medium transition-colors duration-200 flex items-center justify-center cursor-pointer';
+    'rounded px-4 py-2 font-medium transition-colors duration-200 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-700';
 
   const variants = {
-    primary: 'bg-pink-500 text-white hover:bg-pink-600 active:bg-pink-700',
-    secondary: 'bg-gray-700 text-white hover:bg-gray-600 active:bg-gray-500',
-    ghost: 'bg-transparent text-gray-300 hover:text-white',
+    primary:
+      'bg-pink-500 text-white hover:bg-pink-600 active:bg-pink-700 disabled:hover:bg-pink-500',
+    secondary:
+      'bg-gray-700 text-white hover:bg-gray-600 active:bg-gray-500 disabled:hover:bg-gray-700',
+    ghost:
+      'bg-transparent text-gray-300 hover:text-white disabled:hover:text-gray-300',
   };
 
   return (
