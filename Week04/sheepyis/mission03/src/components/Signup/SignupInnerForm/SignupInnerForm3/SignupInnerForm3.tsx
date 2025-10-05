@@ -2,7 +2,7 @@ import * as S from "./styles/SignupInnerForm3Style";
 import Input from "../../../Common/Input/Input";
 import AuthButton from "../../../Common/Button/AuthButton/AuthButton";
 import { useFormContext } from "react-hook-form";
-import type { SignupValues } from "../../../../types/auth/auth";
+import type { SignupValues } from "../../../../utils/auth/signupSchema";
 import { useSignupMutation } from "../../../../hooks/auth/useSignupMutation";
 
 const SignupInnerForm3 = () => {
@@ -10,32 +10,34 @@ const SignupInnerForm3 = () => {
     register,
     handleSubmit,
     getValues,
-    formState: { errors, isValid, isSubmitting },
+    watch,
+    formState: { errors },
   } = useFormContext<SignupValues>();
 
   const { mutate: signup, isPending } = useSignupMutation();
+  const nameValue = watch("name");
+  const disabled = !nameValue || !!errors.name || isPending;
 
-  const onSubmit = handleSubmit(() => {
-    const { email, password, name } = getValues();
-    signup({ email, password, name });
-  });
+  const submit = () =>
+    handleSubmit(() => {
+      const { email, password, name } = getValues();
+      signup({ email, password, name });
+    })();
 
   return (
-    <form className={S.SignupInnerForm3Container} onSubmit={onSubmit}>
+    <form
+      className={S.SignupInnerForm3Container}
+      onSubmit={(e) => e.preventDefault()}
+    >
       <div className={S.SignupProfileImg} />
 
       <Input
         placeholder="닉네임을 입력해주세요."
         error={errors.name?.message}
-        {...register("name", {
-          required: "닉네임을 입력해주세요.",
-        })}
+        {...register("name")}
       />
 
-      <AuthButton
-        text="회원가입 완료"
-        disabled={!isValid || isSubmitting || isPending}
-      />
+      <AuthButton text="회원가입 완료" onClick={submit} disabled={disabled} />
     </form>
   );
 };
