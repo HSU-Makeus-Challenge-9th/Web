@@ -5,6 +5,6 @@ export interface RouteProps {
   component: React.ComponentType;
 }
 
-export const Route: React.FC<RouteProps> = ({ component: Component }) => {
+export const Route = ({ component: Component }: RouteProps) => {
   return <Component />;
 };
