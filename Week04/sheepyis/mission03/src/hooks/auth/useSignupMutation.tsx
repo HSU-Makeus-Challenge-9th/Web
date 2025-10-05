@@ -1,30 +1,33 @@
 import { useMutation } from "@tanstack/react-query";
 import { API } from "../../apis/axios";
 import { useNavigation } from "../useNavigation";
+import { useAuth } from "../../context/auth/authContext";
 
-type SignupRequest = {
-  email: string;
-  password: string;
-  name: string;
+type SignupReq = { email: string; password: string; name: string };
+type SignupRes = {
+  data?: { accessToken?: string; refreshToken?: string; name?: string };
 };
 
-const signupRequest = async (payload: SignupRequest) => {
-  const res = await API.post("/auth/signup", payload);
+const signupRequest = async (payload: SignupReq) => {
+  const res = await API.post<SignupRes>("/auth/signup", payload);
   return res.data;
 };
 
 export const useSignupMutation = () => {
   const { handleMoveClick } = useNavigation();
+  const { setAuth } = useAuth();
 
   return useMutation({
     mutationFn: signupRequest,
-    onSuccess: (data) => {
+    onSuccess: (res) => {
+      const accessToken = res?.data?.accessToken ?? null;
+      const refreshToken = res?.data?.refreshToken ?? null;
+      const name = res?.data?.name ?? null;
+      if (accessToken && refreshToken && name) {
+        setAuth({ accessToken, refreshToken, name });
+      }
       alert("회원가입이 완료되었습니다.");
-      console.log(data);
       handleMoveClick("/");
-    },
-    onError: (err) => {
-      console.error("회원가입 실패:", err);
     },
   });
 };

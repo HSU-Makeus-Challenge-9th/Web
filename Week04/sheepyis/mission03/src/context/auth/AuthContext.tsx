@@ -1,52 +1,36 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import type { AuthState, AuthPayload } from "../../types/auth/auth";
-import {
-  loadAuth,
-  saveAuth,
-  clearAuth as clearAuthStorage,
-} from "../../utils/auth/authStorage";
+import React, { createContext, useContext } from "react";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
 
-type AuthContextType = AuthState & {
+export type AuthState = {
+  accessToken: string | null;
+  refreshToken: string | null;
+  name: string | null;
+};
+export type AuthPayload = Required<AuthState>;
+
+type Ctx = AuthState & {
   setAuth: (p: AuthPayload) => void;
   clearAuth: () => void;
 };
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<Ctx | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [state, setState] = useState<AuthState>({
+  const [auth, setAuthState] = useLocalStorage<AuthState>("auth", {
     accessToken: null,
     refreshToken: null,
     name: null,
   });
 
-  useEffect(() => {
-    setState(loadAuth());
-  }, []);
+  const setAuth = (p: AuthPayload) => setAuthState(p);
+  const clearAuth = () =>
+    setAuthState({ accessToken: null, refreshToken: null, name: null });
 
-  const setAuth = (p: AuthPayload) => {
-    saveAuth(p);
-    setState({
-      accessToken: p.accessToken ?? null,
-      refreshToken: p.refreshToken ?? null,
-      name: p.name ?? null,
-    });
-  };
-
-  const clearAuth = () => {
-    clearAuthStorage();
-    setState({ accessToken: null, refreshToken: null, name: null });
-  };
-
-  const value = useMemo(() => ({ ...state, setAuth, clearAuth }), [state]);
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ ...auth, setAuth, clearAuth }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
