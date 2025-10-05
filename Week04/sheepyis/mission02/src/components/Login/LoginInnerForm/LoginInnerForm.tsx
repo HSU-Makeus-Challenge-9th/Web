@@ -5,43 +5,37 @@ import { useLoginForm } from "../../../hooks/auth/useLoginForm";
 import { useLoginMutation } from "../../../hooks/auth/useLoginMutation";
 
 const LoginInnerForm = () => {
-  const {
-    email,
-    password,
-    emailError,
-    passwordError,
-    handleEmailChange,
-    handlePasswordChange,
-    handleSubmit,
-  } = useLoginForm();
-
   const { mutate: login, isPending } = useLoginMutation();
 
-  const isFormValid = email && password && !emailError && !passwordError;
+  const {
+    registerEmail,
+    registerPassword,
+    errors,
+    isValid,
+    isSubmitting,
+    onSubmit,
+  } = useLoginForm((vals) => {
+    login(vals);
+  });
 
   return (
-    <form
-      className={S.LoginInnerFormContainer}
-      onSubmit={handleSubmit(() => {
-        login({ email, password });
-      })}
-    >
+    <form className={S.LoginInnerFormContainer} onSubmit={onSubmit}>
       <Input
-        value={email}
-        onChange={(e) => handleEmailChange(e.target.value)}
         placeholder="이메일을 입력해주세요!"
-        error={emailError}
+        error={errors.email?.message}
+        {...registerEmail}
       />
 
       <Input
         type="password"
-        value={password}
-        onChange={(e) => handlePasswordChange(e.target.value)}
         placeholder="비밀번호를 입력해주세요!"
-        error={passwordError}
+        error={errors.password?.message}
+        {...registerPassword}
       />
-
-      <AuthButton text="로그인" disabled={!isFormValid || isPending} />
+      <AuthButton
+        text="로그인"
+        disabled={!isValid || isSubmitting || isPending}
+      />
     </form>
   );
 };

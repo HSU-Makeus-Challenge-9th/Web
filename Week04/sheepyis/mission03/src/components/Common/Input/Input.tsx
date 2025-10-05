@@ -1,33 +1,19 @@
 import * as S from "./styles/InputStyle";
+import React, { forwardRef } from "react";
 
-type InputProps = {
-  value?: string;
-  placeholder?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
+type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   error?: string;
 };
 
-const Input = ({
-  value,
-  placeholder,
-  onChange,
-  type = "text",
-  error,
-}: InputProps) => {
-  return (
-    <div className={S.InputWrapper}>
-      <input
-        className={S.InputContainer}
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        onChange={onChange}
-        aria-invalid={!!error}
-      />
-      {error && <p className={S.InputErrorText}>{error}</p>}
-    </div>
-  );
-};
+const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ error, className, ...rest }, ref) => {
+    return (
+      <div className={S.InputWrapper}>
+        <input ref={ref} className={S.InputContainer} {...rest} />
+        {error && <p className={S.InputErrorText}>{error}</p>}
+      </div>
+    );
+  }
+);
 
 export default Input;
