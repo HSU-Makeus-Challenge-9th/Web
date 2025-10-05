@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo List 구현 (HTML, CSS, JS)</title>
+    <link rel="stylesheet" href="main.css" />
+  </head>
+  <body>
+    <main class="app" role="application" aria-label="UMC Study Plan">
+      <header>
+        <h1>UMC Study Plan</h1>
+        <div class="input-row">
+          <input
+            id="task-input"
+            class="input"
+            type="text"
+            placeholder="스터디 계획을 작성해보세요!"
+            aria-label="할 일 입력"
+          />
+        </div>
+      </header>
+
+      <section class="board" aria-live="polite">
+        <section class="column" aria-labelledby="todo-heading">
+          <h2 id="todo-heading" class="column__title">해야 할 일</h2>
+          <ul id="todo-list" class="list" data-role="todo"></ul>
+        </section>
+
+        <section class="column" aria-labelledby="done-heading">
+          <h2 id="done-heading" class="column__title">해낸 일</h2>
+          <ul id="done-list" class="list" data-role="done"></ul>
+        </section>
+      </section>
+    </main>
+
+    <template id="task-template">
+      <li class="task" role="listitem">
+        <span class="task__title"></span>
+        <div class="task__actions">
+          <button
+            class="btn btn--primary btn--complete"
+            type="button"
+            aria-label="완료"
+          >
+            완료
+          </button>
+          <button
+            class="btn btn--pill btn--delete"
+            type="button"
+            aria-label="삭제"
+          >
+            삭제
+          </button>
+        </div>
+      </li>
+    </template>
+    <script src="main.js"></script>
+  </body>
+</html>

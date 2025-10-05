@@ -1,0 +1,35 @@
+/* ===== 제목 ===== */
+.todo-container__header {
+  font-size: 24px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* ===== 입력 폼 ===== */
+.todo-container__form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.todo-container__input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.todo-container__button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.todo-container__button:hover {
+  background-color: #218838;
+}
