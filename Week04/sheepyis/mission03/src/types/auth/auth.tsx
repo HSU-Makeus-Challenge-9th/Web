@@ -21,3 +21,11 @@ export type LoginResponse = {
     refreshToken?: string | null;
   } | null;
 };
+
+// signup
+export type SignupValues = {
+  email: string;
+  password: string;
+  passwordConfirm: string;
+  name: string;
+};

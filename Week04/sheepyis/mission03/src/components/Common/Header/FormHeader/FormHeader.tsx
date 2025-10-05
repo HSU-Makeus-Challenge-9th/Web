@@ -3,14 +3,20 @@ import { useNavigation } from "../../../../hooks/useNavigation";
 
 type FormHeaderProps = {
   title: string;
+  onBack?: () => void;
 };
 
-const FormHeader = ({ title }: FormHeaderProps) => {
+const FormHeader = ({ title, onBack }: FormHeaderProps) => {
   const { handleBackClick } = useNavigation();
+
+  const handleClick = () => {
+    if (onBack) return onBack();
+    handleBackClick();
+  };
 
   return (
     <div className={S.FormHeaderContainer}>
-      <p className={S.FormHeaderP} onClick={handleBackClick}>
+      <p className={S.FormHeaderP} onClick={handleClick}>
         {"<"}
       </p>
       <p className={S.FormHeaderTitle}>{title}</p>

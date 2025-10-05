@@ -9,3 +9,7 @@ export const InputContainer = `
 export const InputErrorText = `
     text-red-500 text-[0.8vw] absolute bottom-[-1.5vw]
 `;
+
+export const ToggleText = `
+    absolute right-[1vw] top-1/2 -translate-y-1/2 text-[1vw] text-gray-600 cursor-pointer
+`;
