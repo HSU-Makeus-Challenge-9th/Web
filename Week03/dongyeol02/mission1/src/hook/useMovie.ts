@@ -1,6 +1,7 @@
+// src/hooks/useMovies.ts
 import { useEffect, useState } from "react";
 import type { Movie, MovieResponse } from "../types/movie";
-import axios from "axios";
+import movieApi from "../apis/movieApi";
 
 export const useMovies = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -13,13 +14,9 @@ export const useMovies = () => {
         setLoading(true);
         setError(null);
 
-        const { data } = await axios.get<MovieResponse>(
-          "https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=1",
-          {
-            headers: {
-              Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_KEY}`,
-            },
-          }
+        // 헤더 설정 없이 간단하게 호출
+        const { data } = await movieApi.get<MovieResponse>(
+          "/movie/popular?language=ko-KR&page=1"
         );
 
         setMovies(data.results);
