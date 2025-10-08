@@ -1,0 +1,37 @@
+/* Block: header */
+.header__nav {
+  display: flex;
+  gap: 20px;
+  font-size: 20px;
+  padding: 20px;
+}
+
+/* Element: link */
+.header__link {
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* Modifiers for different link types */
+.header__link--web {
+  color: #1976d2;
+}
+
+.header__link--wendy {
+  color: #c2185b;
+}
+
+.header__link--hansung {
+  color: #2e7d32;
+}
+
+.header__link--notfound {
+  color: #f57c00;
+}
+
+/* Hover states */
+.header__link:hover {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}

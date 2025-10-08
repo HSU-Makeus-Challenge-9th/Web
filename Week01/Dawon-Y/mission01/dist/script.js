@@ -1,4 +1,6 @@
 "use strict";
+
+//
 class TodoApp {
     constructor(todoInput, addButton, todoList, completedList) {
         this.todos = [];
@@ -79,9 +81,12 @@ class TodoApp {
         li.appendChild(deleteButton);
         return li;
     }
+    // 렌더링
     render() {
         this.$todoList.innerHTML = '';
         this.$completedList.innerHTML = '';
+        // 전체 todos를 완료/미완료로 분리
+        // React Context에서 todos와 doneTodos를 따로 관리하는 것과 다른 접근
         const incompleteTodos = this.todos.filter(todo => !todo.completed);
         const completedTodos = this.todos.filter(todo => todo.completed);
         if (incompleteTodos.length === 0) {
