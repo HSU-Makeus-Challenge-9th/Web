@@ -1,13 +1,18 @@
+// src/pages/SignUpPage.tsx (수정 완료 버전)
+
 import React, { useState, useMemo } from "react";
-import { useForm, useWatch, FieldPath } from "react-hook-form";
+import { useForm, useWatch, FieldPath, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import {
   signUpSchema,
   SignUpFormFields,
   stepFields,
-  RequestSignUpDTO,
-} from "../schemas/signUpSchema";
+} from "../schemas/signUpSchema"; // 스키마 파일에서 정의된 타입과 필드 임포트
+
+// 💡 추가된 import: API 호출 함수와 DTO 타입
+import { postSignup } from "../api/auth";
+import { RequestSignupDTO } from "../types/auth";
 
 // 타입 정의: 단계별 필드 타입 (useForm의 FieldPath 타입으로 지정)
 type StepField = FieldPath<SignUpFormFields>;
@@ -192,13 +197,13 @@ const StepThree: React.FC<{
 //메인 SignUpPage 컴포넌트 (폼 관리)
 function SignUpPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0); // 0: email, 1: password, 2: nickname
+  const [step, setStep] = useState(0);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    trigger, // 수동 유효성 검사 트리거 함수
+    trigger,
     control,
   } = useForm<SignUpFormFields>({
     resolver: zodResolver(signUpSchema),
@@ -220,19 +225,35 @@ function SignUpPage() {
     }
   };
 
-  const onSubmit = async (data: SignUpFormFields) => {
-    const { passwordCheck, ...requestData } = data; // passwordCheck 제거
+  const onSubmit: SubmitHandler<SignUpFormFields> = async (data) => {
+    // 1. passwordCheck 제거 및 백엔드 DTO에 맞게 데이터 준비
+    const { passwordCheck, nickname, email, password } = data;
+
+    // 백엔드 DTO에 맞게 nickname 필드를 name으로 매핑하여 RequestSignupDTO 생성
+    const apiRequestData: RequestSignupDTO = {
+      name: nickname,
+      email: email,
+      password: password,
+      // bio, avatar는 선택 필드이므로 백엔드에서 null/undefined 허용 시 생략 가능
+    };
+
+    console.log("최종 API 전송 데이터:", apiRequestData);
 
     try {
-      // ⚠️ 실제 API 호출 로직
-      // const response = await postSignUp(requestData);
-      console.log("최종 회원가입 데이터:", requestData);
+      // 2. 💡 API 호출 활성화
+      const response = await postSignup(apiRequestData);
 
-      alert("회원가입 성공! 홈 화면으로 이동합니다.");
-      navigate("/"); // 회원가입 후 홈 화면으로 이동
-    } catch (error) {
+      console.log("회원가입 응답:", response);
+      alert(
+        `회원가입 성공! ${response.message || ""} 로그인 페이지로 이동합니다.`
+      );
+      navigate("/login");
+    } catch (error: any) {
       console.error("회원가입 실패:", error);
-      alert("회원가입 실패: 서버 오류");
+      // 서버 응답에서 에러 메시지 추출
+      const errorMessage =
+        error.response?.data?.message || "서버 통신 중 오류가 발생했습니다.";
+      alert(`회원가입 실패: ${errorMessage}`);
     }
   };
 
