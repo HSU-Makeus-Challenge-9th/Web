@@ -1,17 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { useLoginForm, type LoginFormData } from "../hooks/useLogin";
+import { useLoginForm } from "../hooks/useLogin";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { emailRegister, passwordRegister, handleSubmit, errors, isValid } =
+  const { emailRegister, passwordRegister, errors, isValid, onSubmit } =
     useLoginForm();
 
   const handleGoBack = () => {
     navigate(-1);
-  };
-
-  const onSubmit = (data: LoginFormData) => {
-    console.log("로그인 데이터:", data);
   };
 
   return (
@@ -47,7 +43,7 @@ export default function Login() {
           <div className="flex-1 h-px bg-gray-300"></div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={onSubmit}>
           {/* 이메일 */}
           <div className="mb-4">
             <input
@@ -57,7 +53,9 @@ export default function Login() {
               className="w-full bg-gray-50 border border-gray-200 text-gray-800 py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500"
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
@@ -81,9 +79,11 @@ export default function Login() {
             type="submit"
             disabled={!isValid}
             className={`w-full py-3 rounded-xl font-medium shadow-lg transition-colors
-              ${isValid
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
+              ${
+                isValid
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
           >
             로그인
           </button>

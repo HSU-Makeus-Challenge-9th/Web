@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { useSignup, type SignupFormData } from "../hooks/useSignup";
+import { useSignup } from "../hooks/useSignup";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function Signup() {
@@ -10,17 +10,27 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [savedEmail, setSavedEmail] = useLocalStorage("signupEmail", "");
-  const [nickname, setNickname] = useLocalStorage("signupNickname", "");
 
   const {
+    nameRegister,
     emailRegister,
     passwordRegister,
     passwordConfirmRegister,
-    handleSubmit,
+    onSubmit,
     errors,
     isValid,
     watch,
   } = useSignup();
+
+  // 2단계에서만 password와 passwordConfirm 유효성 검사
+  const password = watch("password");
+  const passwordConfirm = watch("passwordConfirm");
+  const isStep2Valid =
+    password &&
+    passwordConfirm &&
+    password === passwordConfirm &&
+    !errors.password &&
+    !errors.passwordConfirm;
 
   const email = watch("email");
 
@@ -36,13 +46,8 @@ export default function Signup() {
     }
   };
 
-  const handleStep2Submit = (data: SignupFormData) => {
+  const handleStep2Submit = () => {
     setStep(3);
-  };
-
-  const onSubmit = (data: SignupFormData) => {
-    console.log("회원가입 데이터:", data);
-    navigate("/");
   };
 
   return (
@@ -118,7 +123,12 @@ export default function Signup() {
               <p className="text-gray-800 font-medium">{savedEmail}</p>
             </div>
 
-            <form onSubmit={handleSubmit(handleStep2Submit)}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleStep2Submit();
+              }}
+            >
               <div className="mb-4 relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -169,10 +179,10 @@ export default function Signup() {
 
               <button
                 type="submit"
-                disabled={!isValid}
+                disabled={!isStep2Valid}
                 className={`w-full py-3 rounded-xl font-medium shadow-lg transition-colors
                   ${
-                    isValid
+                    isStep2Valid
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
@@ -184,7 +194,7 @@ export default function Signup() {
         )}
 
         {step === 3 && (
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={onSubmit}>
             <div className="flex flex-col items-center mb-6">
               <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4" />
 
@@ -194,19 +204,23 @@ export default function Signup() {
 
               <input
                 type="text"
-                placeholder="닉네임을 입력해주세요!"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
+                placeholder="이름을 입력해주세요!"
+                {...nameRegister}
                 className="w-full bg-gray-50 border border-gray-200 text-gray-800 py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500"
               />
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={!nickname.trim()}
+              disabled={!isValid}
               className={`w-full py-3 rounded-xl font-medium shadow-lg transition-colors
         ${
-          nickname.trim()
+          isValid
             ? "bg-blue-600 text-white hover:bg-blue-700"
             : "bg-gray-300 text-gray-500 cursor-not-allowed"
         }`}
