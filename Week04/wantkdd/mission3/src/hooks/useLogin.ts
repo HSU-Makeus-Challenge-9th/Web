@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { signIn } from '../apis/auth';
 import { useLocalStorage } from './useLocalStorage';
 import type { LoginData, LoginResponse } from '../types/auth/login';
+import axios from 'axios';
 
 export const useLogin = () => {
   const navigate = useNavigate();
@@ -26,9 +27,24 @@ export const useLogin = () => {
 
         console.log('로그인 성공:', response.message);
         navigate('/');
+        return { success: true, message: response.message };
+      } else {
+        console.error('로그인 실패:', response.message);
+        return { success: false, message: response.message };
       }
     } catch (error) {
-      console.error('로그인 실패:', error);
+      let errorMessage = '로그인에 실패했습니다.';
+
+      if (axios.isAxiosError(error)) {
+        // 서버로부터 도착한 에러
+        errorMessage = error.response?.data?.message || errorMessage;
+      } else if (error instanceof Error) {
+        // 네트워크 에러
+        errorMessage = error.message;
+      }
+
+      console.error('로그인 실패:', errorMessage);
+      return { success: false, message: errorMessage };
     }
   };
 
