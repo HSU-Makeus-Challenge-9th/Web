@@ -3,6 +3,7 @@ import RootLayout from "../layouts/RootLayout";
 import ProtectedRoute from "./ProtectedRoute";
 
 import LoginPage from "../pages/login/login";
+import GoogleCallbackPage from "../pages/login/googleCallback";
 import SignupPage from "../pages/signup/signup";
 import HomePage from "../pages/home/home";
 import MypagePage from "../pages/mypage/mypage";
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <LoginPage />,
+      },
+      {
+        path: "v1/auth/google/callback",
+        element: <GoogleCallbackPage />,
       },
       {
         path: "mypage",
