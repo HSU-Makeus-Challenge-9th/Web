@@ -1,0 +1,259 @@
+/* 다크모드 CSS */
+
+:root {
+  /* 라이트 모드 색상 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --button-primary: #007bff;
+  --button-primary-hover: #0056b3;
+  --button-success: #28a745;
+  --button-success-hover: #1e7e34;
+  --button-danger: #dc3545;
+  --button-danger-hover: #c82333;
+}
+
+[data-theme="dark"] {
+  /* 다크 모드 색상 */
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #404040;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --border-color: #4a4a4a;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --button-primary: #0d6efd;
+  --button-primary-hover: #0b5ed7;
+  --button-success: #198754;
+  --button-success-hover: #146c43;
+  --button-danger: #dc3545;
+  --button-danger-hover: #bb2d3b;
+}
+
+* {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 20px;
+  background-color: var(--bg-primary);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px var(--shadow);
+  padding: 32px;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.app-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.theme-toggle {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  background-color: var(--border-color);
+}
+
+.todo-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.todo-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.todo-input:focus {
+  outline: none;
+  border-color: var(--button-primary);
+}
+
+.todo-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.add-button {
+  padding: 12px 24px;
+  background-color: var(--button-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-button:hover:not(:disabled) {
+  background-color: var(--button-primary-hover);
+  transform: translateY(-1px);
+}
+
+.add-button:disabled {
+  background-color: var(--text-secondary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.todo-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .todo-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .app-container {
+    margin: 10px;
+    padding: 20px;
+  }
+
+  .app-title {
+    font-size: 24px;
+  }
+}
+
+.todo-section {
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.todo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  min-height: 200px;
+}
+
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.todo-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.todo-text {
+  flex: 1;
+  color: var(--text-primary);
+  font-size: 14px;
+  margin-right: 12px;
+  word-break: break-word;
+}
+
+.todo-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 60px;
+  transition: all 0.3s ease;
+}
+
+.complete-button {
+  background-color: var(--button-success);
+  color: white;
+}
+
+.complete-button:hover {
+  background-color: var(--button-success-hover);
+  transform: scale(1.05);
+}
+
+.delete-button {
+  background-color: var(--button-danger);
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: var(--button-danger-hover);
+  transform: scale(1.05);
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 40px 20px;
+}
+
+.footer {
+  margin-top: 32px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
