@@ -21,10 +21,13 @@ const RootLayout = () => {
   return (
     <>
       <Header onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)} />
-
-      <div className="flex relative h-[calc(100vh-5vw)]">
+      <div className="flex relative h-[calc(100vh-5vw)] overflow-hidden">
         <SideBar isOpen={isSidebarOpen} />
-        <Outlet />
+
+        <div className="flex-1 overflow-y-auto px-[2vw] py-[1vw]">
+          <Outlet />
+        </div>
+
         <AddButton />
       </div>
     </>

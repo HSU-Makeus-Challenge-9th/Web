@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { LpAPI } from "../../apis/lpAxios";
+import { LpAPI } from "../../apis/lp/lpAxios";
 import type { LpResponse } from "../../types/lp/lp";
 
 export const useLpQuery = (

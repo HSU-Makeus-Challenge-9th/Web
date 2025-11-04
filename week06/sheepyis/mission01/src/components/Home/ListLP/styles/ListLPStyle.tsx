@@ -1,5 +1,5 @@
 export const ListLPContainer = `
-    grid grid-cols-5 gap-1
+    grid grid-cols-5 gap-[1vw] mb-[1vw]
 `;
 
 export const ListLPP = `

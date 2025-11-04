@@ -1,3 +1,7 @@
+export const DetailOutContainer = `
+    flex flex-col gap-[1vw]
+`;
+
 export const DetailContainer = `
     w-full h-full rounded bg-gray-700 flex justify-center py-[1vw]
 `;
@@ -39,7 +43,7 @@ export const DetailCDContainer = `
 `;
 
 export const DetailCDImg = `
-    w-[25vw] h-[25vw] rounded-full border-black border-[0.5vw]
+    w-[25vw] h-[25vw] rounded-full border-black border-[0.5vw] object-cover
 `;
 
 export const DetailCDInnerDiv = `

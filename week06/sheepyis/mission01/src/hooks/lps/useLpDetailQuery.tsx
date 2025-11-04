@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { LPDetailAPI } from "../../apis/lpDetailAxios";
+import { LPDetailAPI } from "../../apis/lp/lpDetailAxios";
 
 export const useLpDetail = (id: string | undefined) => {
   return useQuery({

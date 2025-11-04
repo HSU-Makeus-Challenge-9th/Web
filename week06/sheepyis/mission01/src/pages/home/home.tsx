@@ -1,41 +1,45 @@
 import { useState } from "react";
 import ListLp from "../../components/Home/ListLP/ListLP";
-import Spinner from "../../components/Common/Spinner/Spinner";
-import { useLpQuery } from "../../hooks/lps/useLpQuery";
 import * as S from "../../styles/pages/home/HomeStyle";
+import { useInfiniteLpQuery } from "../../hooks/lps/useLpInfiniteQuery";
+import { useInView } from "react-intersection-observer";
+import LPSkeleton from "../../components/Common/Skeleton/LPSkeleton/LPSkeleton";
+import SortButton from "../../components/Common/Button/SortButton/SortButton";
 
 const Home = () => {
   const [order, setOrder] = useState<"asc" | "desc">("desc");
-  const { data, isLoading, isFetching } = useLpQuery(order, 0, 10);
+
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useInfiniteLpQuery(order, 10);
+
+  const { ref } = useInView({
+    threshold: 1,
+    onChange: (inView) => {
+      if (inView && hasNextPage) {
+        fetchNextPage();
+      }
+    },
+  });
 
   return (
     <div className={S.HomeContainer}>
       <div className={S.HomeSortContainer}>
         <div className={S.HomeSortInnerContainer}>
-          <button
-            onClick={() => setOrder("asc")}
-            className={`px-[1vw] py-[0.5vw] rounded cursor-pointer ${
-              order === "asc" ? "bg-white text-black" : "bg-gray-700 text-white"
-            }`}
-          >
-            오래된 순
-          </button>
-          <button
-            onClick={() => setOrder("desc")}
-            className={`px-[1vw] py-[0.5vw] rounded cursor-pointer ${
-              order === "desc"
-                ? "bg-white text-black"
-                : "bg-gray-700 text-white"
-            }`}
-          >
-            최신순
-          </button>
+          <SortButton order={order} setOrder={setOrder} />
         </div>
 
-        {isLoading || isFetching ? (
-          <Spinner />
+        {isLoading ? (
+          <LPSkeleton count={10} />
         ) : (
-          data && <ListLp data={data.data} />
+          <>
+            {data?.pages.map((page) => (
+              <ListLp key={page.nextCursor ?? "first"} data={page.data} />
+            ))}
+
+            {isFetchingNextPage && <LPSkeleton count={10} />}
+
+            <div ref={ref} style={{ height: "1px" }} />
+          </>
         )}
       </div>
     </div>

@@ -4,6 +4,7 @@ import { FiTrash2, FiEdit2 } from "react-icons/fi";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import ListTag from "../ListTag/ListTag";
 import * as S from "./styles/DetailStyle";
+import Comment from "../Comment/Comment";
 
 type Props = {
   data: LpDetailItem;
@@ -21,60 +22,64 @@ const Detail = ({ data }: Props) => {
   };
 
   return (
-    <div className={S.DetailContainer}>
-      <div className={S.DetailInnerContainer}>
-        <div className={S.DetailTopContainer}>
-          <div className={S.DetailTopLeftContainer}>
+    <div className={S.DetailOutContainer}>
+      <div className={S.DetailContainer}>
+        <div className={S.DetailInnerContainer}>
+          <div className={S.DetailTopContainer}>
+            <div className={S.DetailTopLeftContainer}>
+              <img
+                src={data.author.avatar ?? ""}
+                alt={data.author.name}
+                className={S.DetailProfileImg}
+              />
+              <p className={S.DetailP}>{data.author.name}</p>
+            </div>
+            <p className={S.DetailP}>{formattedDate}</p>
+          </div>
+
+          <div className={S.DetailTitleContainer}>
+            <p className={`${S.DetailP} !w-[80%]`}>{data.title}</p>
+            <div className={S.DetailTitleRightContainer}>
+              <button>
+                <FiEdit2 className={S.DetailButtonContainer} />
+              </button>
+              <button>
+                <FiTrash2 className={S.DetailButtonContainer} />
+              </button>
+            </div>
+          </div>
+
+          <div className={S.DetailCDContainer}>
             <img
-              src={data.author.avatar ?? ""}
-              alt={data.author.name}
-              className={S.DetailProfileImg}
+              src={data.thumbnail}
+              alt={data.title}
+              className={S.DetailCDImg}
             />
-            <p className={S.DetailP}>{data.author.name}</p>
+            <div className={S.DetailCDInnerDiv} />
           </div>
-          <p className={S.DetailP}>{formattedDate}</p>
-        </div>
 
-        <div className={S.DetailTitleContainer}>
-          <p className={`${S.DetailP} !w-[80%]`}>{data.title}</p>
-          <div className={S.DetailTitleRightContainer}>
-            <button>
-              <FiEdit2 className={S.DetailButtonContainer} />
-            </button>
-            <button>
-              <FiTrash2 className={S.DetailButtonContainer} />
-            </button>
+          <div className={S.DetailExplainContainer}>
+            <p className={S.DetailP}>{data.content}</p>
           </div>
-        </div>
 
-        <div className={S.DetailCDContainer}>
-          <img
-            src={data.thumbnail}
-            alt={data.title}
-            className={S.DetailCDImg}
-          />
-          <div className={S.DetailCDInnerDiv} />
-        </div>
+          <div className={S.DetailExplainContainer}>
+            <ListTag data={data.tags} />
+          </div>
 
-        <div className={S.DetailExplainContainer}>
-          <p className={S.DetailP}>{data.content}</p>
-        </div>
-
-        <div className={S.DetailExplainContainer}>
-          <ListTag data={data.tags} />
-        </div>
-
-        <div className={S.DetailLikeContainer}>
-          <button onClick={handleLikeToggle}>
-            {isLiked ? (
-              <AiFillHeart className="text-[1.5vw] text-pink-500" />
-            ) : (
-              <AiOutlineHeart className="text-[1.5vw] text-white hover:text-pink-400" />
-            )}
-          </button>
-          <p className={`${S.DetailP} !text-white`}>{likeCount}</p>
+          <div className={S.DetailLikeContainer}>
+            <button onClick={handleLikeToggle}>
+              {isLiked ? (
+                <AiFillHeart className="text-[1.5vw] text-pink-500" />
+              ) : (
+                <AiOutlineHeart className="text-[1.5vw] text-white hover:text-pink-400" />
+              )}
+            </button>
+            <p className={`${S.DetailP} !text-white`}>{likeCount}</p>
+          </div>
         </div>
       </div>
+
+      <Comment />
     </div>
   );
 };
