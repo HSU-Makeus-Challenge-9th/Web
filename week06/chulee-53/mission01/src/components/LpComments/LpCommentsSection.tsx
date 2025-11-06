@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-
 import { useInView } from "react-intersection-observer";
-
 import { MoreVertical } from "lucide-react";
 import { PAGINATION_ORDER } from "../../enums/common";
 import useGetInfiniteLpComments from "../../hooks/queries/useGetInfiniteLpComments";
@@ -74,14 +72,14 @@ const LpCommentsSection = ({ lpId }: { lpId: number }) => {
             className={`px-3 py-1 rounded-sm border text-sm ${
               order === PAGINATION_ORDER.asc
                 ? "bg-white text-black"
-                : "bg-neutral-800 text-gray-300 hover:bg-neutral-700"
+                : "bg-neutral-800 text-gray-300 cursor-pointer hover:bg-neutral-700"
             }`}
             onClick={() => setOrder(PAGINATION_ORDER.asc)}
           >
             오래된순
           </button>
           <button
-            className={`px-3 py-1 rounded-sm border text-sm ${
+            className={`px-3 py-1 rounded-sm border cursor-pointer text-sm ${
               order === PAGINATION_ORDER.desc
                 ? "bg-white text-black"
                 : "bg-neutral-800 text-gray-300 hover:bg-neutral-700"
@@ -100,12 +98,12 @@ const LpCommentsSection = ({ lpId }: { lpId: number }) => {
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="댓글을 입력해주세요"
-          className="flex-1 bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-pink-500"
+          className="flex-1 bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-white"
         />
         <button
           onClick={handleSubmit}
           disabled={createComment.isPending}
-          className="px-4 py-2 rounded-md text-sm bg-neutral-600 text-white hover:bg-pink-600 transition-colors disabled:bg-neutral-700 disabled:cursor-not-allowed"
+          className="px-4 py-2 rounded-md text-sm bg-neutral-600 text-white hover:bg-pink-600 transition-colors disabled:bg-neutral-700 disabled:cursor-not-allowed cursor-pointer"
         >
           {createComment.isPending ? "작성 중..." : "작성"}
         </button>
