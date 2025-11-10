@@ -23,8 +23,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Google Gemini CLI
-        run: npm install -g @google/generative-ai-cli
+      - name: Install GoogleGenerativeAI SDK
+        run: npm install @google/generative-ai
 
       - name: Generate Git Diff for PR
         run: |
