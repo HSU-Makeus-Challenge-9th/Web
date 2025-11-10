@@ -1,10 +1,16 @@
 # .github/workflows/gemini_review.yml
 
 name: Gemini Automated Code Review
-
 on:
   pull_request:
     types: [opened, reopened, synchronize]
+
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: '리뷰할 PR 번호를 입력하세요 (예: 123)'
+        required: true
+        type: number
 
 jobs:
   gemini_code_review:
@@ -17,13 +23,22 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Run Gemini CLI for Code Review
+      - name: Set PR Number
+        id: pr_num_setter
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "pr_number=${{ github.event.inputs.pr_number }}" >> $GITHUB_OUTPUT
+          else
+            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          fi
 
+      - name: Run Gemini CLI for Code Review
         uses: google-github-actions/run-gemini-cli@v1
         with:
           api_key: ${{ secrets.GEMINI_API_KEY }}
           command: pr-review
-          model: 'gemini-2.5-flash'.
+          model: 'gemini-2.5-flash'
+          args: '--pr-number ${{ steps.pr_num_setter.outputs.pr_number }}'
           prompt: |
             당신은 시니어 프론트엔드 개발자입니다. 아래 코드 변경 사항을 면밀히 검토하고 
             1. 잠재적인 버그나 로직 오류
