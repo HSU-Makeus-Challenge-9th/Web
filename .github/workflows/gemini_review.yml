@@ -1,5 +1,3 @@
-# .github/workflows/gemini_review.yml (최종본)
-
 name: Gemini Automated Code Review
 
 on:
@@ -22,32 +20,38 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
-      # 💡 수동 실행 시 PR 번호 설정 (Action이 자동으로 PR을 찾지 못할 때 사용)
-      - name: Set PR Number and Skip Auto-Review for Workflow Dispatch
-        id: pr_num_setter
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "pr_number=${{ github.event.inputs.pr_number }}" >> $GITHUB_OUTPUT
-          else
-            # PR 자동 실행 시에는 Action이 PR 번호를 자동으로 찾을 수 있도록 설정하지 않음
-            echo "pr_number=" >> $GITHUB_OUTPUT 
-          fi
-
-      # 💡 커뮤니티 Action 사용
-      - name: Run Gemini Reviewer
-        uses: truongnh1992/gemini-ai-code-reviewer@v9.1.0
-        # Action이 실행될지 여부를 결정합니다. 수동 실행 시에만 실행합니다.
-        # 기존 PR에 대한 리뷰는 수동으로만 실행되도록 제한합니다.
-        if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
-          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          model: 'gemini-2.5-flash'
+          fetch-depth: 0
 
-          # 수동 실행 시 PR 번호를 강제로 지정
-          pull_request_number: ${{ steps.pr_num_setter.outputs.pr_number }}
+      # PR 이벤트일 때만 실행 (자동 리뷰)
+      - name: Run Gemini Reviewer (Auto)
+        if: github.event_name == 'pull_request'
+        uses: truongnh1992/gemini-ai-code-reviewer@v9.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: 'gemini-2.0-flash-exp'
+        with:
+          extra_prompt: |
+            당신은 시니어 프론트엔드 개발자입니다. 아래 코드 변경 사항을 면밀히 검토하고 
+            1. 잠재적인 버그나 로직 오류
+            2. 성능 저하를 유발하는 부분
+            3. 타입스크립트 문법 오류 및 보완점
+            4. 한국어 주석과 변수명 스타일에 대한 지적
+            5. 중복되는 코드 및 하드 코딩된 부분
+            6. 최소 5개에서 10개 이하의 리뷰
+            에 초점을 맞춰 구체적인 제안과 함께 리뷰를 작성해주세요. 리뷰는 **파일별**로 간결하고 건설적이어야 합니다.
 
+      # 수동 실행일 때만 실행
+      - name: Run Gemini Reviewer (Manual)
+        if: github.event_name == 'workflow_dispatch'
+        uses: truongnh1992/gemini-ai-code-reviewer@v9.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: 'gemini-2.0-flash-exp'
+          PULL_REQUEST_NUMBER: ${{ github.event.inputs.pr_number }}
+        with:
           extra_prompt: |
             당신은 시니어 프론트엔드 개발자입니다. 아래 코드 변경 사항을 면밀히 검토하고 
             1. 잠재적인 버그나 로직 오류
