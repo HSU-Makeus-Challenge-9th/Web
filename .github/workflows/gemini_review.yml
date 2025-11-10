@@ -24,7 +24,7 @@ jobs:
           node-version: 20
 
       - name: Install GoogleGenerativeAI SDK
-        run: npm install @google/generative-ai
+        run: npm install @google/generative-ai@latest
 
       - name: Generate Git Diff for PR
         run: |
@@ -51,9 +51,10 @@ jobs:
             }
 
             const { GoogleGenerativeAI } = require("@google/generative-ai");
-            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, {
+              apiVersion: "v1"
+            });
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
 
             const prompt = `
             당신은 **시니어 프론트엔드 개발자**입니다.
