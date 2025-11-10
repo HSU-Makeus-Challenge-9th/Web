@@ -6,13 +6,12 @@ on:
     branches:
       - main
 
-permissions:
-  pull-requests: write
-  contents: read
-
 jobs:
   code_review:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -31,8 +30,6 @@ jobs:
           git fetch origin "${{ github.event.pull_request.base.ref }}"
           git fetch origin "${{ github.event.pull_request.head.ref }}"
           git diff "origin/${{ github.event.pull_request.base.ref }}"..."origin/${{ github.event.pull_request.head.ref }}" > diff.txt
-          echo "✅ Diff generated:"
-          head -n 20 diff.txt || true
 
       - name: Run Gemini Review
         id: gemini_review
@@ -51,10 +48,8 @@ jobs:
             }
 
             const { GoogleGenerativeAI } = require("@google/generative-ai");
-            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, {
-              apiVersion: "v1"
-            });
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: "v1" });
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
             const prompt = `
             당신은 **시니어 프론트엔드 개발자**입니다.
@@ -86,7 +81,7 @@ jobs:
             console.log("🤖 Gemini에게 코드 리뷰 요청 중...");
 
             const result = await model.generateContent(prompt);
-            const text = result.response.text();
+            const text = await result.response.text();
 
             fs.writeFileSync("review_result.txt", text);
             console.log("✅ Gemini 리뷰 결과 저장 완료");
