@@ -1,14 +1,10 @@
-# .github/workflows/gemini_review.yml
+# .github/workflows/gemini_review.yml (최종본)
 
 name: Gemini Automated Code Review
 
-# 워크플로우 실행 조건 정의
 on:
-  # 1. PR이 생성/재개되거나 새 커밋이 푸시될 때 자동으로 실행
   pull_request:
     types: [opened, reopened, synchronize]
-
-  # 2. GitHub Actions 탭에서 수동으로 실행 가능하도록 설정 (기존 PR 리뷰용)
   workflow_dispatch:
     inputs:
       pr_number:
@@ -20,37 +16,39 @@ jobs:
   gemini_code_review:
     runs-on: ubuntu-latest
     permissions:
-      # PR에 댓글을 남기기 위해 필요
       pull-requests: write
-      # 코드 변경 사항을 읽기 위해 필요
       contents: read
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # PR 번호 결정:
-      # - 자동 실행 시: 이벤트(github.event.pull_request.number)에서 가져옴
-      # - 수동 실행 시: inputs.pr_number에서 가져옴
-      - name: Set PR Number
+      # 💡 수동 실행 시 PR 번호 설정 (Action이 자동으로 PR을 찾지 못할 때 사용)
+      - name: Set PR Number and Skip Auto-Review for Workflow Dispatch
         id: pr_num_setter
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "pr_number=${{ github.event.inputs.pr_number }}" >> $GITHUB_OUTPUT
           else
-            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+            # PR 자동 실행 시에는 Action이 PR 번호를 자동으로 찾을 수 있도록 설정하지 않음
+            echo "pr_number=" >> $GITHUB_OUTPUT 
           fi
 
-      - name: Run Gemini CLI for Code Review
-        uses: google-github-actions/run-gemini-cli@v1
+      # 💡 커뮤니티 Action 사용
+      - name: Run Gemini Reviewer
+        uses: truongnh1992/gemini-ai-code-reviewer@v9.1.0
+        # Action이 실행될지 여부를 결정합니다. 수동 실행 시에만 실행합니다.
+        # 기존 PR에 대한 리뷰는 수동으로만 실행되도록 제한합니다.
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
-          api_key: ${{ secrets.GEMINI_API_KEY }}
-          command: pr-review
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           model: 'gemini-2.5-flash'
-          # 위에서 설정한 PR 번호를 command 인수로 전달
-          args: '--pr-number ${{ steps.pr_num_setter.outputs.pr_number }}'
-          # 사용자 정의 리뷰 프롬프트 설정
-          prompt: |
+
+          # 수동 실행 시 PR 번호를 강제로 지정
+          pull_request_number: ${{ steps.pr_num_setter.outputs.pr_number }}
+
+          extra_prompt: |
             당신은 시니어 프론트엔드 개발자입니다. 아래 코드 변경 사항을 면밀히 검토하고 
             1. 잠재적인 버그나 로직 오류
             2. 성능 저하를 유발하는 부분
