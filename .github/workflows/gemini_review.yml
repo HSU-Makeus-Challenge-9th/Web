@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: '리뷰할 PR 번호를 입력하세요 (예: 123)'
+        description: "리뷰할 PR 번호를 입력하세요 (예: 123)"
         required: true
         type: number
 
@@ -23,16 +23,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      # PR 이벤트일 때만 실행 (자동 리뷰)
       - name: Run Gemini Reviewer (Auto)
         if: github.event_name == 'pull_request'
         uses: truongnh1992/gemini-ai-code-reviewer@v9.1.0
-        env:
+        with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: 'gemini-2.0-flash-exp'
-        with:
-          extra_prompt: |
+          GEMINI_MODEL: "gemini-2.0-flash-exp"
+        env:
+          EXTRA_PROMPT: |
             당신은 시니어 프론트엔드 개발자입니다. 아래 코드 변경 사항을 면밀히 검토하고 
             1. 잠재적인 버그나 로직 오류
             2. 성능 저하를 유발하는 부분
@@ -42,17 +41,16 @@ jobs:
             6. 최소 5개에서 10개 이하의 리뷰
             에 초점을 맞춰 구체적인 제안과 함께 리뷰를 작성해주세요. 리뷰는 **파일별**로 간결하고 건설적이어야 합니다.
 
-      # 수동 실행일 때만 실행
       - name: Run Gemini Reviewer (Manual)
         if: github.event_name == 'workflow_dispatch'
         uses: truongnh1992/gemini-ai-code-reviewer@v9.1.0
-        env:
+        with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: 'gemini-2.0-flash-exp'
+          GEMINI_MODEL: "gemini-2.0-flash-exp"
+        env:
           PULL_REQUEST_NUMBER: ${{ github.event.inputs.pr_number }}
-        with:
-          extra_prompt: |
+          EXTRA_PROMPT: |
             당신은 시니어 프론트엔드 개발자입니다. 아래 코드 변경 사항을 면밀히 검토하고 
             1. 잠재적인 버그나 로직 오류
             2. 성능 저하를 유발하는 부분
