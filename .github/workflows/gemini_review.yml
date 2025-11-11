@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: "리뷰할 PR 번호 (기존 PR 수동 리뷰 시 입력)"
+        description: '리뷰할 PR 번호 (기존 PR 수동 리뷰 시 입력)'
         required: false
 
 jobs:
@@ -107,12 +107,12 @@ jobs:
               아래는 Pull Request diff의 일부입니다 (파트 ${i + 1}/${chunks.length}).
 
               변경 내용을 면밀히 검토하고 아래 항목 중심으로 리뷰하세요:
-              1. 버그 가능성
+              1. 무조건 src 내부에 있는 .ts 및 .tsx 파일만 리뷰합니다.
               2. 성능 문제
               3. 타입스크립트 문법 / 타입 개선점
               4. 변수명, 함수명, 주석 품질
               5. 중복 코드 및 리팩토링 포인트
-              6. 구체적 개선 제안 (최소 5개 이상)
+              6. 구체적 개선 제안 (최소 5개 이상 8개 이하)
 
               <diff part ${i + 1}>
               ${chunks[i]}
