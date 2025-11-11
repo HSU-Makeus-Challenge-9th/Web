@@ -66,9 +66,11 @@ jobs:
 
       - name: Generate Git Diff for PR
         run: |
-          git fetch origin "${{ github.event.pull_request.base.ref }}"
-          git fetch origin "${{ github.event.pull_request.head.ref }}"
-          git diff "origin/${{ github.event.pull_request.base.ref }}"..."origin/${{ github.event.pull_request.head.ref }}" > diff.txt
+          echo "📂 base: ${{ steps.pr_info.outputs.base }}"
+          echo "📂 head: ${{ steps.pr_info.outputs.head }}"
+          git fetch origin "${{ steps.pr_info.outputs.base }}"
+          git fetch origin "${{ steps.pr_info.outputs.head }}"
+          git diff "origin/${{ steps.pr_info.outputs.base }}"..."origin/${{ steps.pr_info.outputs.head }}" > diff.txt
 
       - name: Run Gemini Review
         id: gemini_review
