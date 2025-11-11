@@ -39,15 +39,18 @@ jobs:
         with:
           script: |
             let pr_number;
+
             if (context.eventName === "workflow_dispatch") {
-              pr_number = context.payload.inputs.pr_number;
+              pr_number = context.payload.inputs["pr_number"];
               if (!pr_number) {
-                core.setFailed("❌ 수동 실행 시에는 pr_number 입력이 필요합니다.");
+                core.setFailed("❌ 수동 실행 시에는 PR 번호 입력이 필요합니다.");
                 return;
               }
             } else {
               pr_number = context.payload.pull_request.number;
             }
+
+            console.log(`🔍 리뷰할 PR 번호: ${pr_number}`);
 
             const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
@@ -55,10 +58,11 @@ jobs:
               pull_number: pr_number
             });
 
+            console.log(`📂 base: ${pr.base.ref}, head: ${pr.head.ref}`);
+
             core.setOutput("number", pr_number);
             core.setOutput("base", pr.base.ref);
             core.setOutput("head", pr.head.ref);
-            console.log(`🔍 PR #${pr_number} (${pr.head.ref} -> ${pr.base.ref})`);
 
       - name: Generate Git Diff for PR
         run: |
