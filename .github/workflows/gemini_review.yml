@@ -78,52 +78,68 @@ jobs:
         with:
           script: |
             const fs = require("fs");
-            const diff_output = fs.readFileSync("diff.txt", "utf8");
+            const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+            const diff_output = fs.readFileSync("diff.txt", "utf8");
             if (!diff_output.trim()) {
               console.log("No code changes detected, skipping review.");
               fs.writeFileSync("review_result.txt", "변경된 코드가 없어 리뷰를 건너뜁니다.");
               return;
             }
 
-            const { GoogleGenerativeAI } = require("@google/generative-ai");
-            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: "v1" });
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-            const prompt = `
-            당신은 **시니어 프론트엔드 개발자**입니다.
+            const chunkSize = 90000;
+            const chunks = [];
+            for (let i = 0; i < diff_output.length; i += chunkSize) {
+              chunks.push(diff_output.slice(i, i + chunkSize));
+            }
 
-            다음은 Pull Request의 git diff 내용입니다.
-            각 파일의 변경사항을 면밀히 검토하고 아래 항목 중심으로 리뷰를 작성하세요.
+            let allReviews = [];
+            console.log(`📦 ${chunks.length}개의 청크로 분할 완료`);
 
-            1. 잠재적인 버그나 로직 오류
-            2. 성능 저하를 유발할 수 있는 부분
-            3. 타입스크립트 문법 / 타입 오류 및 개선점
-            4. 변수명, 함수명, 주석 스타일 관련 개선점
-            5. 중복 코드, 하드코딩된 값, 리팩토링 포인트
-            6. 전반적인 코드 품질 및 가독성
-            7. 구체적이고 건설적인 개선 제안 (최소 5개 이상)
+            for (let i = 0; i < chunks.length; i++) {
+              const partPrompt = `
+              당신은 **시니어 프론트엔드 개발자**입니다.
+              아래는 Pull Request diff의 일부입니다 (파트 ${i + 1}/${chunks.length}).
 
-            **출력 형식 요구사항**
-            - 한국어로 작성
-            - 파일별 섹션 구분 (예: ### src/components/Button.tsx)
-            - 마크다운 형식 사용
-            - 불필요한 서론/결론 없이 리뷰 내용만 출력
+              변경 내용을 면밀히 검토하고 아래 항목 중심으로 리뷰하세요:
+              1. 버그 가능성
+              2. 성능 문제
+              3. 타입스크립트 문법 / 타입 개선점
+              4. 변수명, 함수명, 주석 품질
+              5. 중복 코드 및 리팩토링 포인트
+              6. 구체적 개선 제안 (최소 3개 이상)
 
-            아래는 변경된 코드입니다:
+              <diff part ${i + 1}>
+              ${chunks[i]}
+              </diff>
+              `;
 
-            <git diff>
-            ${diff_output}
-            </git diff>
+              console.log(`🤖 Gemini에 part ${i + 1} 요청 중...`);
+              const res = await model.generateContent(partPrompt);
+              const text = res.response.text();
+              allReviews.push(`### Part ${i + 1}\n${text}`);
+            }
+
+            const summaryPrompt = `
+            다음은 코드 리뷰 파트별 결과입니다.
+            이를 통합하여 **하나의 완성된 리뷰**로 정리하세요.
+
+            - 중복 피드백은 병합
+            - 파일별로 정리
+            - 명확하고 간결하게 유지
+
+            ${allReviews.join("\n\n")}
             `;
 
-            console.log("🤖 Gemini에게 코드 리뷰 요청 중...");
+            console.log("🧠 Gemini에게 최종 리뷰 요약 요청 중...");
+            const summaryRes = await model.generateContent(summaryPrompt);
+            const finalText = summaryRes.response.text();
 
-            const result = await model.generateContent(prompt);
-            const text = await result.response.text();
-
-            fs.writeFileSync("review_result.txt", text);
-            console.log("✅ Gemini 리뷰 결과 저장 완료");
+            fs.writeFileSync("review_result.txt", finalText);
+            console.log("✅ Gemini 리뷰 결과 저장 완료 (전체 diff 포함)");
 
       - name: Comment on Pull Request
         uses: actions/github-script@v7
