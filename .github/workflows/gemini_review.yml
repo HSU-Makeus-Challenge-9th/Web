@@ -128,17 +128,39 @@ jobs:
             const fs = require("fs");
             const review = fs.readFileSync("review_result.txt", "utf8");
 
-            const pr_number = context.payload.pull_request.number;
+            const pr_number = ${{ steps.pr_info.outputs.number }};
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            console.log(`🗣️ Posting Gemini review to PR #${pr_number}`);
+            console.log(`🗣️ Gemini 코드리뷰 업데이트 on PR #${pr_number}`);
 
-            await github.rest.issues.createComment({
+            const { data: comments } = await github.rest.issues.listComments({
               owner,
               repo,
-              issue_number: pr_number,
-              body: `## 🤖 Gemini 코드리뷰 결과\n${review}`
+              issue_number: pr_number
             });
 
-            console.log("✅ Gemini 리뷰 코멘트 작성 완료");
+            const existing = comments.find(c =>
+              c.user?.type === "Bot" &&
+              c.body?.startsWith("## 🤖 Gemini 코드리뷰 결과")
+            );
+
+            if (existing) {
+              console.log(`♻️ 기존 Gemini 리뷰 코멘트(#${existing.id}) 수정 중...`);
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body: `## 🤖 Gemini 코드리뷰 결과\n${review}`
+              });
+            } else {
+              console.log("💬 기존 Gemini 리뷰 코멘트 없음 — 새로 작성");
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr_number,
+                body: `## 🤖 Gemini 코드리뷰 결과\n${review}`
+              });
+            }
+
+            console.log("✅ Gemini 리뷰 코멘트 갱신 완료");
