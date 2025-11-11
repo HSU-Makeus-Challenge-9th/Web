@@ -1,22 +1,16 @@
-import { Link, useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
+import { useLogout } from "../hooks/mutations/useLogout";
+import useGetMyInfo from "../hooks/queries/useGetMyInfo";
 
 type NavbarProps = {
   onSidebarToggle?: () => void;
 };
 
 const Navbar = ({ onSidebarToggle }: NavbarProps) => {
-  const navigate = useNavigate();
-  const { accessToken, logout, userName } = useAuth();
-  const [isSearching, setIsSearching] = useState(false);
-  const [search, setSearch] = useState("");
-
-  const handleLogout = async () => {
-    await logout();
-    navigate("/");
-  };
+  const { accessToken } = useAuth();
+  const { data: me } = useGetMyInfo(accessToken);
+  const { mutate: handleLogout, isPending } = useLogout();
 
   return (
     <nav className="w-full h-20 flex items-center justify-between px-6 bg-neutral-900 text-white">
@@ -43,14 +37,13 @@ const Navbar = ({ onSidebarToggle }: NavbarProps) => {
           </svg>
         </button>
 
-        {/* 로고 */}
         <Link to="/" className="text-pink-500 font-bold text-2xl">
           돌려돌려LP판
         </Link>
       </div>
 
       <div className="flex items-center gap-3">
-        {!accessToken && (
+        {!accessToken ? (
           <>
             <Link
               to="/login"
@@ -65,39 +58,17 @@ const Navbar = ({ onSidebarToggle }: NavbarProps) => {
               회원가입
             </Link>
           </>
-        )}
-
-        {/* 검색 아이콘 */}
-        {!isSearching ? (
-          <button
-            onClick={() => setIsSearching(true)}
-            className="flex items-center gap-2 hover:text-pink-400 transition-colors"
-          >
-            <Search size={18} />
-          </button>
         ) : (
-          <div className="flex items-center gap-2">
-            <Search size={18} className="text-gray-300" />
-            <input
-              className="border border-gray-400 rounded-sm px-2 py-1 text-black w-full"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              autoFocus
-              onBlur={() => setIsSearching(false)}
-            />
-          </div>
-        )}
-
-        {accessToken && (
           <>
             <Link to="/my" className="py-2 text-sm text-gray-300">
-              {userName}님 반갑습니다.
+              {me?.data?.name}님 반갑습니다.
             </Link>
             <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-black rounded-md hover:bg-gray-800 transition-colors cursor-pointer"
+              onClick={() => handleLogout()}
+              disabled={isPending}
+              className="px-4 py-2 bg-black rounded-md hover:bg-gray-800 transition-colors cursor-pointer disabled:opacity-50"
             >
-              로그아웃
+              {isPending ? "로그아웃 중..." : "로그아웃"}
             </button>
           </>
         )}
