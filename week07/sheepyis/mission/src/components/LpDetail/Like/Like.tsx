@@ -40,11 +40,23 @@ const Like = ({ lpId, initialCount, likes }: LikeProps) => {
     if (isLiked) {
       setIsLiked(false);
       setLikeCount((prev) => prev - 1);
-      removeLike.mutate(lpId);
+
+      removeLike.mutate(lpId, {
+        onError: () => {
+          setIsLiked(true);
+          setLikeCount((prev) => prev + 1);
+        },
+      });
     } else {
       setIsLiked(true);
       setLikeCount((prev) => prev + 1);
-      addLike.mutate(lpId);
+
+      addLike.mutate(lpId, {
+        onError: () => {
+          setIsLiked(false);
+          setLikeCount((prev) => prev - 1);
+        },
+      });
     }
   };
 
