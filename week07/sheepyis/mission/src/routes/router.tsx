@@ -39,7 +39,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "lp/:id",
+        path: "lp/:lpId",
         element: (
           <ProtectedRoute>
             <LpDetailPage />

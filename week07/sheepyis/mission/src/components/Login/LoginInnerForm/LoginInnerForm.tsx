@@ -1,5 +1,5 @@
 import * as S from "./styles/LoginInnerFormStyle";
-import Input from "../../Common/Input/Input";
+import Input from "../../Common/Input/Input/Input";
 import AuthButton from "../../Common/Button/AuthButton/AuthButton";
 import { useLoginForm } from "../../../hooks/auth/useLoginForm";
 import { useLoginMutation } from "../../../hooks/auth/useLoginMutation";

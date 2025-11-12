@@ -1,5 +1,5 @@
 import * as S from "./styles/SignupInnerForm3Style";
-import Input from "../../../Common/Input/Input";
+import Input from "../../../Common/Input/Input/Input";
 import AuthButton from "../../../Common/Button/AuthButton/AuthButton";
 import { useFormContext } from "react-hook-form";
 import type { SignupValues } from "../../../../schemas/auth/signupSchema";

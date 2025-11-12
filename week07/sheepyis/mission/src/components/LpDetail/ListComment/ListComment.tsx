@@ -4,9 +4,10 @@ import * as S from "./styles/ListCommentStyle";
 
 type Props = {
   data: CommentItem[];
+  lpId: number;
 };
 
-const ListComment = ({ data }: Props) => {
+const ListComment = ({ data, lpId }: Props) => {
   if (data.length === 0) {
     return <p className={S.ListCommentNotP}>아직 댓글이 없습니다.</p>;
   }
@@ -14,7 +15,7 @@ const ListComment = ({ data }: Props) => {
   return (
     <div className={S.ListCommentContainer}>
       {data.map((comment) => (
-        <ItemComment key={comment.id} comment={comment} />
+        <ItemComment key={comment.id} comment={comment} lpId={lpId} />
       ))}
     </div>
   );

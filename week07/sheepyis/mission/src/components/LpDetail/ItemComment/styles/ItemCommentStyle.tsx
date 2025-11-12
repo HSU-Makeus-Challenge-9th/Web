@@ -11,7 +11,11 @@ export const ItemCommentNotProfileImg = `
 `;
 
 export const ItemCommentExplainContainer = `
-    flex flex-col
+    flex flex-col w-full
+`;
+
+export const ItemCommentModalContainer = `
+    flex justify-between w-full items-center relative
 `;
 
 export const ItemCommentNameP = `
@@ -20,4 +24,16 @@ export const ItemCommentNameP = `
 
 export const ItemCommentContentP = `
     text-gray-400 text-[1vw]
+`;
+
+export const EditContainer = `
+    flex justify-between items-center
+`;
+
+export const ItemCommentInput = `
+    w-[90%] h-[2.5vw] text-[1.2vw] border border-gray-500 rounded-sm px-[1vw]
+`;
+
+export const ItemCommentButton = `
+    bg-gray-500 text-[1.2vw] w-[8%] h-[2.5vw] rounded-sm
 `;

@@ -14,3 +14,19 @@ export type CommentResponse = {
   nextCursor: number | null;
   hasNext: boolean;
 };
+
+export interface AddCommentPayload {
+  lpId: number;
+  content: string;
+}
+
+export interface EditCommentPayload {
+  lpId: number;
+  commentId: number;
+  content: string;
+}
+
+export interface DeleteCommentPayload {
+  lpId: number;
+  commentId: number;
+}

@@ -5,8 +5,8 @@ import * as S from "../../styles/pages/lpDetail/lpDetailStyle";
 import Spinner from "../../components/Common/Spinner/Spinner";
 
 const LpDetail = () => {
-  const { id } = useParams<{ id: string }>();
-  const { data, isLoading } = useLpDetail(id);
+  const { lpId } = useParams<{ lpId: string }>();
+  const { data, isLoading } = useLpDetail(lpId);
 
   if (isLoading) {
     return (

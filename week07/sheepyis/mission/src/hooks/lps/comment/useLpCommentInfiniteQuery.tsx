@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { LpCommentAPI } from "../../apis/lp/lpCommentAxios";
-import type { CommentResponse } from "../../types/lp/comment";
+import { LpCommentAPI } from "../../../apis/lp/lpCommentAxios";
+import type { CommentResponse } from "../../../types/lp/comment";
 
 export const useLpCommentInfiniteQuery = (
   lpId: number,
