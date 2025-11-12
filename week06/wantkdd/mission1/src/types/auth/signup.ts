@@ -14,3 +14,8 @@ export interface SignUpRequestBody {
   bio?: string;
   avatar?: File | null;
 }
+
+export interface SignUpResponse {
+  status: boolean;
+  message: string;
+}

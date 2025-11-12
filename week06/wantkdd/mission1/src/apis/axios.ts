@@ -64,6 +64,7 @@ PrivateAPI.interceptors.request.use(
         config.headers.Authorization = `Bearer ${parsedToken}`;
       } catch (error) {
         console.log(error);
+        // JSON.parse 실패 시 원본 토큰 사용
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
     }
@@ -75,47 +76,48 @@ PrivateAPI.interceptors.request.use(
 );
 
 // 응답 인터셉터
-PrivateAPI.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  async (error: AxiosError) => {
-    const originalRequest = error.config as typeof error.config & {
-      _retry?: boolean;
-    };
-    // 401 에러가 아니거나, 재시도 플래그가 이미 설정되어 있으면 에러 반환
-    if (
-      error.response?.status !== 401 ||
-      !originalRequest ||
-      originalRequest?._retry
-    ) {
-      return Promise.reject(error);
-    }
+const handleResponseError = async (error: AxiosError) => {
+  // 네트워크 에러 처리
+  if (axios.isAxiosError(error) && !error.response) {
+    return Promise.reject(new Error('서버에 연결할 수 없습니다.'));
+  }
 
+  const originalRequest = error.config as typeof error.config & {
+    _retry?: boolean;
+  };
+
+  // 401 에러 처리 (토큰 만료)
+  if (
+    error.response?.status === 401 &&
+    originalRequest &&
+    !originalRequest._retry
+  ) {
     originalRequest._retry = true;
 
     try {
-      // 현재 진행 중인 토큰 갱신 요청이 있으면 재사용
       if (!refreshTokenPromise) {
         refreshTokenPromise = refreshAccessToken();
       }
-
-      // 진행 중인 갱신 요청을 기다림
       const newAccessToken = await refreshTokenPromise;
-
-      // Promise를 비워 다음 401 요청이 새 갱신을 시도할 수 있게 함
       refreshTokenPromise = null;
 
-      if (!newAccessToken) {
-        return Promise.reject(error);
+      if (newAccessToken) {
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return PrivateAPI(originalRequest);
       }
-
-      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-      return PrivateAPI(originalRequest);
     } catch (refreshError) {
       refreshTokenPromise = null;
       return Promise.reject(refreshError);
     }
   }
+
+  // 그 외 서버 에러
+  return Promise.reject(error);
+};
+
+API.interceptors.response.use((response) => response, handleResponseError);
+
+PrivateAPI.interceptors.response.use(
+  (response) => response,
+  handleResponseError
 );

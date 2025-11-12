@@ -33,11 +33,7 @@ export const useLogin = () => {
     } catch (error) {
       let errorMessage = '로그인에 실패했습니다.';
 
-      if (axios.isAxiosError(error)) {
-        // 서버로부터 도착한 에러
-        errorMessage = error.response?.data?.message || errorMessage;
-      } else if (error instanceof Error) {
-        // 네트워크 에러
+      if (error instanceof Error) {
         errorMessage = error.message;
       }
 

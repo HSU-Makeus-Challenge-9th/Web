@@ -1,5 +1,9 @@
 import { PrivateAPI } from './axios';
-import type { CommentListResponse, GetCommentsParams } from '../types/comment';
+import type {
+  CommentListResponse,
+  CommentPaginationData,
+  GetCommentsParams,
+} from '../types/comment';
 
 //lp 댓글 조회
 export const getLpComments = async ({
@@ -7,7 +11,7 @@ export const getLpComments = async ({
   cursor = 0,
   limit = 10,
   order = 'asc',
-}: GetCommentsParams) => {
+}: GetCommentsParams): Promise<CommentPaginationData> => {
   const response = await PrivateAPI.get<CommentListResponse>(
     `/lps/${lpId}/comments`,
     {
