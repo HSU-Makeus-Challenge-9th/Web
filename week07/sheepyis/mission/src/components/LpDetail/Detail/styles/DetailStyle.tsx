@@ -26,6 +26,10 @@ export const DetailP = `
     text-[1vw]
 `;
 
+export const DetailTitleInput = `
+    w-[90%] bg-gray-800 h-[2vw] text-[1vw] px-[1vw] rounded-sm
+`;
+
 export const DetailTitleContainer = `
     w-full flex justify-between
 `;
@@ -54,6 +58,22 @@ export const DetailExplainContainer = `
     w-full
 `;
 
-export const DetailLikeContainer = `
-    w-full flex justify-center items-center gap-[0.5vw]
+export const DetailExplainTextArea = `
+    w-full bg-gray-800 rounded-sm p-[1vw] min-h-[6vw] text-[1vw] resize-none
+`;
+
+export const DetailTagContainer = `
+    w-full flex flex-col gap-[1vw]
+`;
+
+export const DetailTagInnerContainer = `
+    flex flex-col gap-[1vw]
+`;
+
+export const DetailTagAdd = `
+    flex justify-between
+`;
+
+export const DetailTagButton = `
+    bg-pink-600 rounded-sm h-[2vw] w-[8%] text-[1vw]
 `;

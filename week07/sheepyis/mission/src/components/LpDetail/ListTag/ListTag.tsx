@@ -8,13 +8,20 @@ type Tag = {
 
 type Props = {
   data: Tag[];
+  isEditMode?: boolean;
+  onRemove?: (id: number) => void;
 };
 
-const ListTag = ({ data }: Props) => {
+const ListTag = ({ data, isEditMode = false, onRemove }: Props) => {
   return (
     <div className={S.ListTagContainer}>
       {data.map((tag) => (
-        <ItemTag key={tag.id} item={tag} />
+        <ItemTag
+          key={tag.id}
+          item={tag}
+          isEditMode={isEditMode}
+          onRemove={onRemove}
+        />
       ))}
     </div>
   );

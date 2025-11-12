@@ -5,12 +5,23 @@ type Props = {
     id: number;
     name: string;
   };
+  isEditMode?: boolean;
+  onRemove?: (id: number) => void;
 };
 
-const ItemTag = ({ item }: Props) => {
+const ItemTag = ({ item, isEditMode = false, onRemove }: Props) => {
   return (
     <div className={S.ItemTagContainer}>
       <p className={S.ItemTagP}>#{item.name}</p>
+      {isEditMode && (
+        <button
+          type="button"
+          onClick={() => onRemove?.(item.id)}
+          className={`${S.ItemTagP} cursor-pointer`}
+        >
+          ✕
+        </button>
+      )}
     </div>
   );
 };
