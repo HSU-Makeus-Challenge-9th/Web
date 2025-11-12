@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useInfiniteComments } from '../hooks/useInfiniteComments';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
@@ -20,14 +20,13 @@ const CommentSection = ({ lpId }: CommentSectionProps) => {
   const [sortOrder, setSortOrder] = useState<CommentSortOrder>('desc');
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
-  // 현재 사용자 정보 가져오기
-  useState(() => {
+  useEffect(() => {
     if (isAuthenticated) {
       getMyInfo().then((response) => {
         setCurrentUserId(response.data.id);
       });
     }
-  });
+  }, [isAuthenticated]);
 
   const {
     data,
@@ -64,15 +63,10 @@ const CommentSection = ({ lpId }: CommentSectionProps) => {
   });
 
   const handleIntersect = useCallback(() => {
-  console.log('=== Intersection triggered ===');
-  console.log('hasNextPage:', hasNextPage);
-  console.log('isFetchingNextPage:', isFetchingNextPage);
-  
-  if (hasNextPage && !isFetchingNextPage) {
-    console.log('Fetching next page...');
-    fetchNextPage();
-  }
-}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const observerRef = useIntersectionObserver({
     onIntersect: handleIntersect,
@@ -169,6 +163,5 @@ const CommentSection = ({ lpId }: CommentSectionProps) => {
     </div>
   );
 };
-
 
 export default CommentSection;
