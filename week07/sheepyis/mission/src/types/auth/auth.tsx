@@ -29,3 +29,19 @@ export type SignupValues = {
   passwordConfirm: string;
   name: string;
 };
+
+export interface UserResponse {
+  id: number;
+  name: string;
+  email: string;
+  bio: string | null;
+  avatar: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EditUserPayload {
+  name: string;
+  bio?: string;
+  avatar?: string | null;
+}
