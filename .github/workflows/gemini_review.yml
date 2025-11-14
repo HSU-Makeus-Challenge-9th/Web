@@ -106,7 +106,7 @@ jobs:
               .map(block => "diff --git" + block);
 
             const tsDiffs = fileDiffs.filter(block =>
-              /a\/src\/.*\.(ts|tsx)/.test(block)
+              /a\/src\//
             );
 
             console.log("Filtered ts/tsx files:", tsDiffs.length);
@@ -123,7 +123,7 @@ jobs:
               당신은 시니어 프론트엔드 개발자입니다.
 
               아래는 특정 파일의 diff입니다.
-              **src/ 내부의 .ts / .tsx 파일만 리뷰합니다.**
+              **src/ 내부만 리뷰합니다.**
 
               JSON 배열 형식만 출력하세요:
 
