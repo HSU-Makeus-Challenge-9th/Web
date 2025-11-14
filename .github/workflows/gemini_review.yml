@@ -66,13 +66,11 @@ jobs:
 
       - name: Generate Git Diff for PR
         run: |
-          echo "📂 PR Base: ${{ steps.pr_info.outputs.base }}"
-          echo "📂 PR Head: ${{ steps.pr_info.outputs.head }}"
-
-          git fetch origin "refs/pull/${{ steps.pr_info.outputs.number }}/head":pr-head
-          git fetch origin "refs/pull/${{ steps.pr_info.outputs.number }}/base":pr-base
-
-          git diff pr-base pr-head > diff.txt
+          echo "📂 base: ${{ steps.pr_info.outputs.base }}"
+          echo "📂 head: ${{ steps.pr_info.outputs.head }}"
+          git fetch origin "${{ steps.pr_info.outputs.base }}"
+          git fetch origin "${{ steps.pr_info.outputs.head }}"
+          git diff "origin/${{ steps.pr_info.outputs.base }}"..."origin/${{ steps.pr_info.outputs.head }}" > diff.txt
 
       - name: Run Gemini Review (Line-by-Line JSON)
         id: gemini_review
