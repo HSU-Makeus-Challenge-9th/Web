@@ -72,7 +72,7 @@ jobs:
           git fetch origin "${{ steps.pr_info.outputs.head }}"
           git diff "origin/${{ steps.pr_info.outputs.base }}"..."origin/${{ steps.pr_info.outputs.head }}" > diff.txt
 
-      - name: Run Gemini Review (Chunked)
+      - name: Run Gemini Review with Chunking
         id: gemini_review
         uses: actions/github-script@v7
         env:
@@ -80,89 +80,85 @@ jobs:
         with:
           script: |
             const fs = require("fs");
+
             const diff_output = fs.readFileSync("diff.txt", "utf8");
+            if (!diff_output.trim()) {
+              console.log("No code changes detected, skipping review.");
+              fs.writeFileSync("review.json", "[]");
+              return;
+            }
 
             const { GoogleGenerativeAI } = require("@google/generative-ai");
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-            if (!diff_output.trim()) {
-              fs.writeFileSync("review.json", "[]");
-              return;
-            }
+            const CHUNK_SIZE = 90000;
+            const chunks = [];
 
-            const CHUNK_SIZE = 30000;
-            let chunks = [];
             for (let i = 0; i < diff_output.length; i += CHUNK_SIZE) {
-              chunks.push(diff_output.slice(i, i + CHUNK_SIZE));
-            }
-            console.log(`📦 청크 개수: ${chunks.length}`);
-
-
-            async function askGemini(prompt) {
-              const res = await model.generateContent(prompt);
-              return res.response.text();
+              chunks.push(diff_output.substring(i, i + CHUNK_SIZE));
             }
 
-            let merged = [];
+            console.log(`📦 총 ${chunks.length}개의 청크로 분할됨`);
+
+            const finalReviews = [];
 
             for (let idx = 0; idx < chunks.length; idx++) {
               const chunk = chunks[idx];
+
+              console.log(`▶ Gemini 요청 중... 청크 ${idx + 1}/${chunks.length}`);
 
               const prompt = `
               Explain in Korean.
 
               당신은 **시니어 프론트엔드 개발자**입니다.
-              아래 git diff 조각(chunk ${idx+1}/${chunks.length})을 기반으로
-              변경된 코드의 '변경된 줄'마다 리뷰 코멘트를 생성하세요.
+              아래 git diff만을 기반으로 변경된 줄에 대한 코드 리뷰 코멘트를 JSON 배열로 작성하세요.
 
-              출력은 반드시 **JSON 배열만**:
+              반드시 아래 형식으로만 출력하세요:
 
               [
                 {
                   "path": "src/components/Example.tsx",
                   "line": 123,
-                  "text": "리뷰 코멘트",
+                  "text": "코멘트",
                   "side": "RIGHT"
                 }
               ]
 
               규칙:
-              - src 내부의 .ts / .tsx 파일만 리뷰
-              - 성능 문제 판단
-              - 타입스크립트 문법/타입 개선 지적
-              - 변수명/함수명/주석 품질 평가
-              - 중복 코드/리팩토링 포인트 제안
-              - 각 코멘트는 1~2줄만 작성
+              1. src 내부 .ts / .tsx 파일만 포함
+              2. 청크에 없는 파일/라인 정보는 절대 작성 금지
+              3. JSON 이외의 설명 텍스트 절대 금지
 
-              매우 중요:
-              - "@@ -a,b +c,d @@" 를 사용해 정확한 새 라인 번호 계산
-              - JSON 코드블록 금지 (```json 포함 금지)
-              - JSON 외 다른 텍스트를 절대 출력하지 말 것
-
-              <git diff>
+              <git diff chunk>
               ${chunk}
-              </git diff>
+              </git diff chunk>
               `;
 
-              console.log(`🤖 Gemini 요청: chunk ${idx+1}/${chunks.length}`);
-              let raw = await askGemini(prompt);
-
-              // 코드블록 제거
-              raw = raw.replace(/```json/g, "").replace(/```/g, "").trim();
-
               try {
-                const parsed = JSON.parse(raw);
-                merged.push(...parsed);
-              } catch (e) {
-                console.log("❌ JSON 파싱 실패. 출력:");
-                console.log(raw);
-                throw e;
+                const result = await model.generateContent(prompt);
+                let text = result.response.text().trim();
+                
+                text = text.replace(/```json|```/g, "").trim();
+
+                let parsed = [];
+                try {
+                  parsed = JSON.parse(text);
+                  if (!Array.isArray(parsed)) parsed = [];
+                } catch (err) {
+                  console.log("⚠ JSON parse 실패 → 해당 청크는 건너뜀");
+                  continue;
+                }
+
+                finalReviews.push(...parsed);
+
+              } catch (error) {
+                console.log("❌ Gemini 요청 실패:", error.message);
               }
             }
 
-            fs.writeFileSync("review.json", JSON.stringify(merged, null, 2));
-            console.log("🎉 모든 청크 JSON 병합 완료");
+            fs.writeFileSync("review.json", JSON.stringify(finalReviews, null, 2));
+            console.log("🎉 모든 청크 처리 완료 → review.json 생성됨");
 
       - name: Convert JSON to diff positions
         id: convert
@@ -170,36 +166,27 @@ jobs:
         with:
           script: |
             const fs = require("fs");
-
             let raw = fs.readFileSync("review.json", "utf8")
-            raw = raw
+              .trim()
               .replace(/```json/g, "")
               .replace(/```/g, "")
-              .trim();
-
-            const jsonMatch = raw.match(/\[[\s\S]*\]/);
-
-            if (!jsonMatch) {
-              console.log("❌ JSON 배열을 찾을 수 없음!");
-              console.log("Raw output:");
-              console.log(raw);
-              throw new Error("Gemini JSON extraction failed");
-            }
-
-            let jsonString = jsonMatch[0];
+              .replace(/^\n+|\n+$/g, "");
 
             let review;
+
             try {
-              review = JSON.parse(jsonString);
-            } catch (e) {
-              console.log("❌ JSON.parse 실패");
-              console.log("원본 JSON 문자열:");
-              console.log(jsonString);
-              throw e;
+              review = JSON.parse(raw);
+            } catch (err) {
+              console.log("Gemini JSON parse error");
+              console.log("Raw output:");
+              console.log(raw);
+              throw err;
             }
+
             const diff = fs.readFileSync("diff.txt", "utf8");
 
             const output = [];
+
             const fileBlocks = diff.split("diff --git").slice(1);
 
             for (const block of fileBlocks) {
@@ -229,12 +216,12 @@ jobs:
 
                 if (line.startsWith("+")) {
                   newLine++;
-                  const match = fileComments.find(c => c.line === newLine);
-                  if (match) {
+                  const comment = fileComments.find(c => c.line === newLine);
+                  if (comment) {
                     output.push({
                       path,
                       position,
-                      body: match.text
+                      body: comment.text
                     });
                   }
                   continue;
@@ -245,7 +232,8 @@ jobs:
                   continue;
                 }
 
-                oldLine++; newLine++;
+                oldLine++;
+                newLine++;
               }
             }
 
@@ -258,7 +246,7 @@ jobs:
             const comments = JSON.parse(`${{ steps.convert.outputs.comments }}`);
 
             if (!comments.length) {
-              console.log("코멘트 없음 — 리뷰 생략");
+              console.log("No review comments generated.");
               return;
             }
 
@@ -270,4 +258,4 @@ jobs:
               comments
             });
 
-            console.log("라인별 코드 리뷰 제출 완료!");
+            console.log("라인별 코드 리뷰 제출됨!");
