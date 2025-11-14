@@ -3,6 +3,8 @@ name: Gemini Automated Code Review
 on:
   pull_request:
     types: [opened, reopened, synchronize]
+    paths:
+      - "src/**"
     branches:
       - main
 
@@ -72,7 +74,7 @@ jobs:
           git fetch origin "${{ steps.pr_info.outputs.head }}"
           git diff "origin/${{ steps.pr_info.outputs.base }}"..."origin/${{ steps.pr_info.outputs.head }}" > diff.txt
 
-      - name: Run Gemini Review (Line-by-Line JSON)
+      - name: Run Gemini Review (Chunked)
         id: gemini_review
         uses: actions/github-script@v7
         env:
@@ -83,56 +85,86 @@ jobs:
             const diff_output = fs.readFileSync("diff.txt", "utf8");
 
             const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-            if (!diff_output.trim()) {
-              console.log("No code changes detected, skipping review.");
-              fs.writeFileSync("review_result.txt", "변경된 코드가 없어 리뷰를 건너뜁니다.");
-              return;
-            }
-
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-            const prompt = `
-            Explain in Korean.
+            if (!diff_output.trim()) {
+              fs.writeFileSync("review.json", "[]");
+              return;
+            }
 
-            당신은 **시니어 프론트엔드 개발자**입니다.
-            아래 git diff를 기반으로 변경된 줄마다 코드리뷰 코멘트를 작성하세요.
+            const CHUNK_SIZE = 30000;
+            let chunks = [];
+            for (let i = 0; i < diff_output.length; i += CHUNK_SIZE) {
+              chunks.push(diff_output.slice(i, i + CHUNK_SIZE));
+            }
+            console.log(`📦 청크 개수: ${chunks.length}`);
 
-            반드시 다음 JSON 형식을 **엄격히** 지켜서 출력하십시오:
+            // --- 2) Request Gemini for each chunk ---
+            async function askGemini(prompt) {
+              const res = await model.generateContent(prompt);
+              return res.response.text();
+            }
 
-            [
-              {
-                "path": "src/components/Example.tsx",
-                "line": 123,
-                "text": "라인별 리뷰 코멘트",
-                "side": "RIGHT"
+            let merged = [];
+
+            for (let idx = 0; idx < chunks.length; idx++) {
+              const chunk = chunks[idx];
+
+              const prompt = `
+              Explain in Korean.
+
+              당신은 **시니어 프론트엔드 개발자**입니다.
+              아래 git diff 조각(chunk ${idx+1}/${chunks.length})을 기반으로
+              변경된 코드의 '변경된 줄'마다 리뷰 코멘트를 생성하세요.
+
+              출력은 반드시 **JSON 배열만**:
+
+              [
+                {
+                  "path": "src/components/Example.tsx",
+                  "line": 123,
+                  "text": "리뷰 코멘트",
+                  "side": "RIGHT"
+                }
+              ]
+
+              규칙:
+              - src 내부의 .ts / .tsx 파일만 리뷰
+              - 성능 문제 판단
+              - 타입스크립트 문법/타입 개선 지적
+              - 변수명/함수명/주석 품질 평가
+              - 중복 코드/리팩토링 포인트 제안
+              - 각 코멘트는 1~2줄만 작성
+
+              매우 중요:
+              - "@@ -a,b +c,d @@" 를 사용해 정확한 새 라인 번호 계산
+              - JSON 코드블록 금지 (```json 포함 금지)
+              - JSON 외 다른 텍스트를 절대 출력하지 말 것
+
+              <git diff>
+              ${chunk}
+              </git diff>
+              `;
+
+              console.log(`🤖 Gemini 요청: chunk ${idx+1}/${chunks.length}`);
+              let raw = await askGemini(prompt);
+
+              // 코드블록 제거
+              raw = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+
+              try {
+                const parsed = JSON.parse(raw);
+                merged.push(...parsed);
+              } catch (e) {
+                console.log("❌ JSON 파싱 실패. 출력:");
+                console.log(raw);
+                throw e;
               }
-            ]
+            }
 
-            규칙:
-            1. **무조건 src 내부에 있는 .ts 및 .tsx 파일만 리뷰합니다.**
-            2. **성능 문제**가 있는지 해당 라인 기준으로 평가합니다.
-            3. **타입스크립트 문법 오류, 타입 미스매치, 타입 개선 포인트**가 있으면 지적합니다.
-            4. **변수명, 함수명, 주석 품질**이 부족한 경우 개선 의견을 냅니다.
-            5. **중복 코드 또는 리팩토링 포인트**가 보이면 간단하게 제안합니다.
-            6. 단, 라인별 리뷰 특성상 **각 코멘트는 1~2줄로 간결하게 작성**합니다.
-              (전체 파일 기준 5~8개 제안은 불가능하므로 "해당 줄에 필요한 제안"만 작성)
-
-            매우 중요:
-            - diff 의 "@@ -a,b +c,d @@" 정보를 이용해 **정확한 실제 변경 라인 번호(line)** 를 계산해야 합니다.
-            - JSON 형식이 조금이라도 깨지면 안 됩니다.
-            - JSON 이외의 설명 텍스트를 절대 출력하지 마세요.
-
-            <git diff>
-            ${diff_output}
-            </git diff>
-            `;
-
-            const result = await model.generateContent(prompt);
-            const text = result.response.text();
-
-            fs.writeFileSync("review.json", text);
+            fs.writeFileSync("review.json", JSON.stringify(merged, null, 2));
+            console.log("🎉 모든 청크 JSON 병합 완료");
 
       - name: Convert JSON to diff positions
         id: convert
@@ -140,27 +172,16 @@ jobs:
         with:
           script: |
             const fs = require("fs");
+
             let raw = fs.readFileSync("review.json", "utf8")
-              .trim()
               .replace(/```json/g, "")
               .replace(/```/g, "")
-              .replace(/^\n+|\n+$/g, "");
+              .trim();
 
-            let review;
-
-            try {
-              review = JSON.parse(raw);
-            } catch (err) {
-              console.log("Gemini JSON parse error");
-              console.log("Raw output:");
-              console.log(raw);
-              throw err;
-            }
-
+            let review = JSON.parse(raw);
             const diff = fs.readFileSync("diff.txt", "utf8");
 
             const output = [];
-
             const fileBlocks = diff.split("diff --git").slice(1);
 
             for (const block of fileBlocks) {
@@ -190,12 +211,12 @@ jobs:
 
                 if (line.startsWith("+")) {
                   newLine++;
-                  const comment = fileComments.find(c => c.line === newLine);
-                  if (comment) {
+                  const match = fileComments.find(c => c.line === newLine);
+                  if (match) {
                     output.push({
                       path,
                       position,
-                      body: comment.text
+                      body: match.text
                     });
                   }
                   continue;
@@ -206,8 +227,7 @@ jobs:
                   continue;
                 }
 
-                oldLine++;
-                newLine++;
+                oldLine++; newLine++;
               }
             }
 
@@ -220,7 +240,7 @@ jobs:
             const comments = JSON.parse(`${{ steps.convert.outputs.comments }}`);
 
             if (!comments.length) {
-              console.log("No review comments generated.");
+              console.log("코멘트 없음 — 리뷰 생략");
               return;
             }
 
@@ -232,4 +252,4 @@ jobs:
               comments
             });
 
-            console.log("라인별 코드 리뷰 제출됨!");
+            console.log("라인별 코드 리뷰 제출 완료!");
