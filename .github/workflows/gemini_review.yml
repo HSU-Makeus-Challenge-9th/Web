@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: '리뷰할 PR 번호 (기존 PR 수동 리뷰 시 입력)'
+        description: "리뷰할 PR 번호 (기존 PR 수동 리뷰 시 입력)"
         required: false
 
 jobs:
@@ -66,13 +66,15 @@ jobs:
 
       - name: Generate Git Diff for PR
         run: |
-          echo "📂 base: ${{ steps.pr_info.outputs.base }}"
-          echo "📂 head: ${{ steps.pr_info.outputs.head }}"
-          git fetch origin "${{ steps.pr_info.outputs.base }}"
-          git fetch origin "${{ steps.pr_info.outputs.head }}"
-          git diff "origin/${{ steps.pr_info.outputs.base }}"..."origin/${{ steps.pr_info.outputs.head }}" > diff.txt
+          echo "📂 PR Base: ${{ steps.pr_info.outputs.base }}"
+          echo "📂 PR Head: ${{ steps.pr_info.outputs.head }}"
 
-      - name: Run Gemini Review
+          git fetch origin "refs/pull/${{ steps.pr_info.outputs.number }}/head":pr-head
+          git fetch origin "refs/pull/${{ steps.pr_info.outputs.number }}/base":pr-base
+
+          git diff pr-base pr-head > diff.txt
+
+      - name: Run Gemini Review (Line-by-Line JSON)
         id: gemini_review
         uses: actions/github-script@v7
         env:
@@ -80,9 +82,10 @@ jobs:
         with:
           script: |
             const fs = require("fs");
+            const diff_output = fs.readFileSync("diff.txt", "utf8");
+
             const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-            const diff_output = fs.readFileSync("diff.txt", "utf8");
             if (!diff_output.trim()) {
               console.log("No code changes detected, skipping review.");
               fs.writeFileSync("review_result.txt", "변경된 코드가 없어 리뷰를 건너뜁니다.");
@@ -92,97 +95,127 @@ jobs:
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-            const chunkSize = 90000;
-            const chunks = [];
-            for (let i = 0; i < diff_output.length; i += chunkSize) {
-              chunks.push(diff_output.slice(i, i + chunkSize));
-            }
+            const prompt = `
+            Explain in Korean.
 
-            let allReviews = [];
-            console.log(`📦 ${chunks.length}개의 청크로 분할 완료`);
+            당신은 **시니어 프론트엔드 개발자**입니다.
+            아래 git diff를 기반으로 변경된 줄마다 코드리뷰 코멘트를 작성하세요.
 
-            for (let i = 0; i < chunks.length; i++) {
-              const partPrompt = `
-              당신은 **시니어 프론트엔드 개발자**입니다.
-              아래는 Pull Request diff의 일부입니다 (파트 ${i + 1}/${chunks.length}).
+            반드시 다음 JSON 형식을 **엄격히** 지켜서 출력하십시오:
 
-              변경 내용을 면밀히 검토하고 아래 항목 중심으로 리뷰하세요:
-              1. 무조건 src 내부에 있는 .ts 및 .tsx 파일만 리뷰합니다.
-              2. 성능 문제
-              3. 타입스크립트 문법 / 타입 개선점
-              4. 변수명, 함수명, 주석 품질
-              5. 중복 코드 및 리팩토링 포인트
-              6. 구체적 개선 제안 (최소 5개 이상 8개 이하)
+            [
+              {
+                "path": "src/components/Example.tsx",
+                "line": 123,
+                "text": "라인별 리뷰 코멘트",
+                "side": "RIGHT"
+              }
+            ]
 
-              <diff part ${i + 1}>
-              ${chunks[i]}
-              </diff>
-              `;
+            규칙:
+            1. **무조건 src 내부에 있는 .ts 및 .tsx 파일만 리뷰합니다.**
+            2. **성능 문제**가 있는지 해당 라인 기준으로 평가합니다.
+            3. **타입스크립트 문법 오류, 타입 미스매치, 타입 개선 포인트**가 있으면 지적합니다.
+            4. **변수명, 함수명, 주석 품질**이 부족한 경우 개선 의견을 냅니다.
+            5. **중복 코드 또는 리팩토링 포인트**가 보이면 간단하게 제안합니다.
+            6. 단, 라인별 리뷰 특성상 **각 코멘트는 1~2줄로 간결하게 작성**합니다.
+              (전체 파일 기준 5~8개 제안은 불가능하므로 "해당 줄에 필요한 제안"만 작성)
 
-              console.log(`🤖 Gemini에 part ${i + 1} 요청 중...`);
-              const res = await model.generateContent(partPrompt);
-              const text = res.response.text();
-              allReviews.push(`### Part ${i + 1}\n${text}`);
-            }
+            매우 중요:
+            - diff 의 "@@ -a,b +c,d @@" 정보를 이용해 **정확한 실제 변경 라인 번호(line)** 를 계산해야 합니다.
+            - JSON 형식이 조금이라도 깨지면 안 됩니다.
+            - JSON 이외의 설명 텍스트를 절대 출력하지 마세요.
 
-            const summaryPrompt = `
-            다음은 코드 리뷰 파트별 결과입니다.
-            이를 통합하여 **하나의 완성된 리뷰**로 정리하세요.
-
-            - 중복 피드백은 병합
-            - 파일별로 정리
-            - 명확하고 간결하게 유지
-
-            ${allReviews.join("\n\n")}
+            <git diff>
+            ${diff_output}
+            </git diff>
             `;
 
-            console.log("🧠 Gemini에게 최종 리뷰 요약 요청 중...");
-            const summaryRes = await model.generateContent(summaryPrompt);
-            const finalText = summaryRes.response.text();
+            const result = await model.generateContent(prompt);
+            const text = result.response.text();
 
-            fs.writeFileSync("review_result.txt", finalText);
-            console.log("✅ Gemini 리뷰 결과 저장 완료 (전체 diff 포함)");
+            fs.writeFileSync("review.json", text);
 
-      - name: Comment on Pull Request
+      - name: Convert JSON to diff positions
+        id: convert
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require("fs");
-            const review = fs.readFileSync("review_result.txt", "utf8");
+            const review = JSON.parse(fs.readFileSync("review.json", "utf8"));
+            const diff = fs.readFileSync("diff.txt", "utf8");
 
-            const pr_number = ${{ steps.pr_info.outputs.number }};
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
+            const output = [];
 
-            console.log(`🗣️ Gemini 코드리뷰 업데이트 on PR #${pr_number}`);
+            const fileBlocks = diff.split("diff --git").slice(1);
 
-            const { data: comments } = await github.rest.issues.listComments({
-              owner,
-              repo,
-              issue_number: pr_number
-            });
+            for (const block of fileBlocks) {
+              const pathMatch = block.match(/b\/(.+)\nindex/);
+              if (!pathMatch) continue;
 
-            const existing = comments.find(c =>
-              c.user?.type === "Bot" &&
-              c.body?.startsWith("## 🤖 Gemini 코드리뷰 결과")
-            );
+              const path = pathMatch[1];
+              const fileComments = review.filter(c => c.path === path);
+              if (fileComments.length === 0) continue;
 
-            if (existing) {
-              console.log(`♻️ 기존 Gemini 리뷰 코멘트(#${existing.id}) 수정 중...`);
-              await github.rest.issues.updateComment({
-                owner,
-                repo,
-                comment_id: existing.id,
-                body: `## 🤖 Gemini 코드리뷰 결과\n${review}`
-              });
-            } else {
-              console.log("💬 기존 Gemini 리뷰 코멘트 없음 — 새로 작성");
-              await github.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number: pr_number,
-                body: `## 🤖 Gemini 코드리뷰 결과\n${review}`
-              });
+              const lines = block.split("\n");
+              let position = 0;
+              let newLine = 0;
+              let oldLine = 0;
+
+              for (const line of lines) {
+                position++;
+
+                if (line.startsWith("@@")) {
+                  const m = line.match(/@@ -(\d+),?\d* \+(\d+),?\d* @@/);
+                  if (m) {
+                    oldLine = parseInt(m[1]);
+                    newLine = parseInt(m[2]);
+                  }
+                  continue;
+                }
+
+                if (line.startsWith("+")) {
+                  newLine++;
+                  const comment = fileComments.find(c => c.line === newLine);
+                  if (comment) {
+                    output.push({
+                      path,
+                      position,
+                      body: comment.text
+                    });
+                  }
+                  continue;
+                }
+
+                if (line.startsWith("-")) {
+                  oldLine++;
+                  continue;
+                }
+
+                oldLine++;
+                newLine++;
+              }
             }
 
-            console.log("✅ Gemini 리뷰 코멘트 갱신 완료");
+            core.setOutput("comments", JSON.stringify(output));
+
+      - name: Submit Code Review
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comments = JSON.parse(`${{ steps.convert.outputs.comments }}`);
+
+            if (!comments.length) {
+              console.log("No review comments generated.");
+              return;
+            }
+
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ steps.pr_info.outputs.number }},
+              event: "COMMENT",
+              comments
+            });
+
+            console.log("라인별 코드 리뷰 제출됨!");
