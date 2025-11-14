@@ -32,7 +32,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install GitHub CLI
-        run: sudo apt-get install -y gh
+        run: sudo apt-get install -y gh jq
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -50,7 +50,7 @@ jobs:
 
           git fetch origin "${{ github.event.pull_request.base.ref }}"
           git fetch origin "${{ github.event.pull_request.head.ref }}"
-          git diff --unified=0 "origin/${{ github.event.pull_request.base.ref }}" > diff.txt
+          git diff --unified=0 "origin/${{ github.event.pull_request.base.ref }}" "origin/${{ github.event.pull_request.head.ref }}" > diff.txt
 
       - name: Get git diff for manual PR review
         if: github.event_name == 'workflow_dispatch'
@@ -64,6 +64,7 @@ jobs:
 
           git fetch origin $BASE
           git fetch origin $HEAD
+
           git diff --unified=0 origin/$BASE origin/$HEAD > diff.txt
 
       - name: Detect PR for push event
@@ -88,57 +89,75 @@ jobs:
 
           git diff --unified=0 origin/$BASE origin/$HEAD > diff.txt
 
-      - name: Run Gemini-2.5-flash
+      - name: Run Gemini Review (Chunked)
         id: gemini_review
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require("fs");
-            const diff = fs.readFileSync("diff.txt", "utf8");
-
             const { GoogleGenerativeAI } = require("@google/generative-ai");
-            const genAI = new GoogleGenerativeAI("${{ secrets.GEMINI_API_KEY }}");
+
+            const rawDiff = fs.readFileSync("diff.txt", "utf8");
+
+            const CHUNK_SIZE = 20000;
+            const chunks = [];
+            for (let i = 0; i < rawDiff.length; i += CHUNK_SIZE) {
+              chunks.push(rawDiff.slice(i, i + CHUNK_SIZE));
+            }
+
+            console.log(`Total chunks: ${chunks.length}`);
+
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-            const prompt = `
-            당신은 시니어 프론트엔드 개발자입니다.
+            let allComments = [];
 
-            이 diff를 기반으로 PR 코드 리뷰를 수행하세요.
-            **src/ 내부의 .ts, .tsx 파일만 리뷰합니다.**
+            for (let i = 0; i < chunks.length; i++) {
+              const prompt = `
+              당신은 시니어 프론트엔드 개발자입니다.
 
-            다음 JSON 배열만 출력하세요:
+              아래 diff는 전체 중 일부 chunk입니다.  
+              **반드시 src/ 내부 .ts / .tsx 파일만 리뷰하세요.**
 
-            [
-              {
-                "path": "파일경로",
-                "line": 라인번호,
-                "text": "리뷰코멘트",
-                "side": "RIGHT"
+              JSON 배열 형식만 출력하세요:
+
+              [
+                {
+                  "path": "파일경로",
+                  "line": 라인번호,
+                  "text": "리뷰내용",
+                  "side": "RIGHT"
+                }
+              ]
+
+              JSON 외 텍스트 금지.
+
+              <diff chunk ${i + 1}/${chunks.length}>
+              ${chunks[i]}
+              </diff chunk>
+              `;
+
+              console.log(`Processing chunk ${i + 1}/${chunks.length}`);
+
+              const result = await model.generateContent(prompt);
+              const text = result.response.text();
+
+              try {
+                const parsed = JSON.parse(text);
+                allComments.push(...parsed);
+              } catch (e) {
+                console.log("⚠️ JSON parse failed in chunk:", i + 1);
+                console.log(text);
               }
-            ]
+            }
 
-            JSON 외 텍스트 출력 금지.
+            fs.writeFileSync("review_result.txt", JSON.stringify(allComments, null, 2));
+            console.log("Review saved!");
 
-            <git diff>
-            ${diff}
-            </git diff>
-            `;
-
-            const result = await model.generateContent(prompt);
-            const text = result.response.text();
-
-            fs.writeFileSync("review_result.txt", text);
-
-      - name: Parse review result
-        id: store
-        run: |
-          COMMENT=$(cat review_result.txt | jq -c .)
-          echo "comment=$COMMENT" >> $GITHUB_OUTPUT
-
-      - name: Add review comments to PR
+      - name: Add PR Review Comments
         uses: nbaztec/add-pr-review-comment@v1.0.7
         with:
-          comments: ${{ steps.store.outputs.comment }}
+          comments: ${{ steps.gemini_review.outputs.comment }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: "github-actions[bot]"
           allow-repeats: false
