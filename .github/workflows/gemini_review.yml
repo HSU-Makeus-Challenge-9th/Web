@@ -2,18 +2,21 @@ name: Gemini Automated Code Review
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+  push:
     branches:
       - main
 
   workflow_dispatch:
     inputs:
       pr_number:
-        description: "리뷰할 PR 번호 (기존 PR 수동 리뷰 시 입력)"
-        required: false
+        description: "리뷰할 PR 번호 (수동 실행 시 필수)"
+        required: true
 
 jobs:
-  code_review:
+  code-review:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -25,6 +28,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -33,229 +39,103 @@ jobs:
       - name: Install GoogleGenerativeAI SDK
         run: npm install @google/generative-ai@latest
 
-      - name: Determine PR Info
-        id: pr_info
-        uses: actions/github-script@v7
-        with:
-          script: |
-            let pr_number;
-
-            if (context.eventName === "workflow_dispatch") {
-              pr_number = context.payload.inputs["pr_number"];
-              if (!pr_number) {
-                core.setFailed("❌ 수동 실행 시에는 PR 번호 입력이 필요합니다.");
-                return;
-              }
-            } else {
-              pr_number = context.payload.pull_request.number;
-            }
-
-            console.log(`🔍 리뷰할 PR 번호: ${pr_number}`);
-
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pr_number
-            });
-
-            console.log(`📂 base: ${pr.base.ref}, head: ${pr.head.ref}`);
-
-            core.setOutput("number", pr_number);
-            core.setOutput("base", pr.base.ref);
-            core.setOutput("head", pr.head.ref);
-
-      - name: Generate Git Diff for PR
+      - name: Get git diff for PR
+        if: github.event_name == 'pull_request'
         run: |
-          echo "📂 base: ${{ steps.pr_info.outputs.base }}"
-          echo "📂 head: ${{ steps.pr_info.outputs.head }}"
-          git fetch origin "${{ steps.pr_info.outputs.base }}"
-          git fetch origin "${{ steps.pr_info.outputs.head }}"
-          git diff "origin/${{ steps.pr_info.outputs.base }}"..."origin/${{ steps.pr_info.outputs.head }}" > diff.txt
+          echo "EVENT_TYPE=pull_request" >> $GITHUB_ENV
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
 
-      - name: Run Gemini Review with Chunking
+          git fetch origin "${{ github.event.pull_request.base.ref }}"
+          git fetch origin "${{ github.event.pull_request.head.ref }}"
+          git diff --unified=0 "origin/${{ github.event.pull_request.base.ref }}" > diff.txt
+
+      - name: Get git diff for manual PR review
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          PR_NUMBER="${{ github.event.inputs.pr_number }}"
+          echo "EVENT_TYPE=pull_request" >> $GITHUB_ENV
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+
+          BASE=$(gh pr view $PR_NUMBER --json baseRefName -q .baseRefName)
+          HEAD=$(gh pr view $PR_NUMBER --json headRefName -q .headRefName)
+
+          git fetch origin $BASE
+          git fetch origin $HEAD
+          git diff --unified=0 origin/$BASE origin/$HEAD > diff.txt
+
+      - name: Detect PR for push event
+        if: github.event_name == 'push'
+        run: |
+          PR_NUMBER=$(gh pr list --state open --json number,headRefName \
+            --jq ".[] | select(.headRefName==\"${GITHUB_REF_NAME}\") | .number")
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "Push된 커밋과 연결된 PR을 찾을 수 없습니다."
+            exit 1
+          fi
+
+          echo "EVENT_TYPE=pull_request" >> $GITHUB_ENV
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+
+          BASE=$(gh pr view $PR_NUMBER --json baseRefName -q .baseRefName)
+          HEAD=$(gh pr view $PR_NUMBER --json headRefName -q .headRefName)
+
+          git fetch origin $BASE
+          git fetch origin $HEAD
+
+          git diff --unified=0 origin/$BASE origin/$HEAD > diff.txt
+
+      - name: Run Gemini-2.5-flash
         id: gemini_review
         uses: actions/github-script@v7
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         with:
           script: |
             const fs = require("fs");
-
-            const diff_output = fs.readFileSync("diff.txt", "utf8");
-            if (!diff_output.trim()) {
-              console.log("No code changes detected, skipping review.");
-              fs.writeFileSync("review.json", "[]");
-              return;
-            }
-
-            const { GoogleGenerativeAI } = require("@google/generative-ai");
-            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-            const CHUNK_SIZE = 10000;
-            const chunks = [];
-
-            for (let i = 0; i < diff_output.length; i += CHUNK_SIZE) {
-              chunks.push(diff_output.substring(i, i + CHUNK_SIZE));
-            }
-
-            console.log(`📦 총 ${chunks.length}개의 청크로 분할됨`);
-
-            const finalReviews = [];
-
-            for (let idx = 0; idx < chunks.length; idx++) {
-              const chunk = chunks[idx];
-
-              console.log(`▶ Gemini 요청 중... 청크 ${idx + 1}/${chunks.length}`);
-
-              const prompt = `
-              Explain in Korean.
-
-              당신은 **시니어 프론트엔드 개발자**입니다.
-              아래 git diff만을 기반으로 변경된 줄에 대한 코드 리뷰 코멘트를 JSON 배열로 작성하세요.
-
-              반드시 아래 형식으로만 출력하세요:
-
-              [
-                {
-                  "path": "src/components/Example.tsx",
-                  "line": 123,
-                  "text": "코멘트",
-                  "side": "RIGHT"
-                }
-              ]
-
-              규칙:
-              1. src 내부 .ts / .tsx 파일만 포함
-              2. 청크에 없는 파일/라인 정보는 절대 작성 금지
-              3. JSON 이외의 설명 텍스트 절대 금지
-
-              <git diff chunk>
-              ${chunk}
-              </git diff chunk>
-              `;
-
-              try {
-                const result = await model.generateContent(prompt);
-                let text = result.response.text().trim();
-
-                text = text.replace(/```json|```/g, "").trim();
-
-                let parsed = [];
-                try {
-                  parsed = JSON.parse(text);
-                  if (!Array.isArray(parsed)) parsed = [];
-                } catch (err) {
-                  console.log("⚠ JSON parse 실패 → 해당 청크는 건너뜀");
-                  continue;
-                }
-
-                finalReviews.push(...parsed);
-
-              } catch (error) {
-                console.log("❌ Gemini 요청 실패:", error.message);
-              }
-            }
-
-            fs.writeFileSync("review.json", JSON.stringify(finalReviews, null, 2));
-            console.log("🎉 모든 청크 처리 완료 → review.json 생성됨");
-
-      - name: Convert JSON to diff positions
-        id: convert
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require("fs");
-            let raw = fs.readFileSync("review.json", "utf8")
-              .trim()
-              .replace(/```json/g, "")
-              .replace(/```/g, "")
-              .replace(/^\n+|\n+$/g, "");
-
-            let review;
-
-            try {
-              review = JSON.parse(raw);
-            } catch (err) {
-              console.log("Gemini JSON parse error");
-              console.log("Raw output:");
-              console.log(raw);
-              throw err;
-            }
-
             const diff = fs.readFileSync("diff.txt", "utf8");
 
-            const output = [];
+            const { GoogleGenerativeAI } = require("@google/generative-ai");
+            const genAI = new GoogleGenerativeAI("${{ secrets.GEMINI_API_KEY }}");
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-            const fileBlocks = diff.split("diff --git").slice(1);
+            const prompt = `
+            당신은 시니어 프론트엔드 개발자입니다.
 
-            for (const block of fileBlocks) {
-              const pathMatch = block.match(/b\/(.+)\nindex/);
-              if (!pathMatch) continue;
+            이 diff를 기반으로 PR 코드 리뷰를 수행하세요.
+            **src/ 내부의 .ts, .tsx 파일만 리뷰합니다.**
 
-              const path = pathMatch[1];
-              const fileComments = review.filter(c => c.path === path);
-              if (fileComments.length === 0) continue;
+            다음 JSON 배열만 출력하세요:
 
-              const lines = block.split("\n");
-              let position = 0;
-              let newLine = 0;
-              let oldLine = 0;
-
-              for (const line of lines) {
-                position++;
-
-                if (line.startsWith("@@")) {
-                  const m = line.match(/@@ -(\d+),?\d* \+(\d+),?\d* @@/);
-                  if (m) {
-                    oldLine = parseInt(m[1]);
-                    newLine = parseInt(m[2]);
-                  }
-                  continue;
-                }
-
-                if (line.startsWith("+")) {
-                  newLine++;
-                  const comment = fileComments.find(c => c.line === newLine);
-                  if (comment) {
-                    output.push({
-                      path,
-                      position,
-                      body: comment.text
-                    });
-                  }
-                  continue;
-                }
-
-                if (line.startsWith("-")) {
-                  oldLine++;
-                  continue;
-                }
-
-                oldLine++;
-                newLine++;
+            [
+              {
+                "path": "파일경로",
+                "line": 라인번호,
+                "text": "리뷰코멘트",
+                "side": "RIGHT"
               }
-            }
+            ]
 
-            core.setOutput("comments", JSON.stringify(output));
+            JSON 외 텍스트 출력 금지.
 
-      - name: Submit Code Review
-        uses: actions/github-script@v7
+            <git diff>
+            ${diff}
+            </git diff>
+            `;
+
+            const result = await model.generateContent(prompt);
+            const text = result.response.text();
+
+            fs.writeFileSync("review_result.txt", text);
+
+      - name: Parse review result
+        id: store
+        run: |
+          COMMENT=$(cat review_result.txt | jq -c .)
+          echo "comment=$COMMENT" >> $GITHUB_OUTPUT
+
+      - name: Add review comments to PR
+        uses: nbaztec/add-pr-review-comment@v1.0.7
         with:
-          script: |
-            const comments = JSON.parse(`${{ steps.convert.outputs.comments }}`);
-
-            if (!comments.length) {
-              console.log("No review comments generated.");
-              return;
-            }
-
-            await github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: ${{ steps.pr_info.outputs.number }},
-              event: "COMMENT",
-              comments
-            });
-
-            console.log("라인별 코드 리뷰 제출됨!");
+          comments: ${{ steps.store.outputs.comment }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token-user-login: "github-actions[bot]"
+          allow-repeats: false
