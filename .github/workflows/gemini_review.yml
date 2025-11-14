@@ -140,7 +140,23 @@ jobs:
         with:
           script: |
             const fs = require("fs");
-            const review = JSON.parse(fs.readFileSync("review.json", "utf8"));
+            let raw = fs.readFileSync("review.json", "utf8")
+              .trim()
+              .replace(/```json/g, "")
+              .replace(/```/g, "")
+              .replace(/^\n+|\n+$/g, "");
+
+            let review;
+
+            try {
+              review = JSON.parse(raw);
+            } catch (err) {
+              console.log("Gemini JSON parse error");
+              console.log("Raw output:");
+              console.log(raw);
+              throw err;
+            }
+
             const diff = fs.readFileSync("diff.txt", "utf8");
 
             const output = [];
