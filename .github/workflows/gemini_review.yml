@@ -98,7 +98,7 @@ jobs:
             }
             console.log(`📦 청크 개수: ${chunks.length}`);
 
-            // --- 2) Request Gemini for each chunk ---
+
             async function askGemini(prompt) {
               const res = await model.generateContent(prompt);
               return res.response.text();
@@ -172,11 +172,31 @@ jobs:
             const fs = require("fs");
 
             let raw = fs.readFileSync("review.json", "utf8")
+            raw = raw
               .replace(/```json/g, "")
               .replace(/```/g, "")
               .trim();
 
-            let review = JSON.parse(raw);
+            const jsonMatch = raw.match(/\[[\s\S]*\]/);
+
+            if (!jsonMatch) {
+              console.log("❌ JSON 배열을 찾을 수 없음!");
+              console.log("Raw output:");
+              console.log(raw);
+              throw new Error("Gemini JSON extraction failed");
+            }
+
+            let jsonString = jsonMatch[0];
+
+            let review;
+            try {
+              review = JSON.parse(jsonString);
+            } catch (e) {
+              console.log("❌ JSON.parse 실패");
+              console.log("원본 JSON 문자열:");
+              console.log(jsonString);
+              throw e;
+            }
             const diff = fs.readFileSync("diff.txt", "utf8");
 
             const output = [];
