@@ -1,16 +1,32 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetLpDetail } from "../hooks/queries/useGetLpDetail";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Heart, Trash2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { deleteLp } from "../apis/lp";
 import LpCommentsSection from "../components/LpComments/LpCommentsSection";
+import useGetMyInfo from "./../hooks/queries/useGetMyInfo";
+import { useAuth } from "../context/AuthContext";
+import usePostLike from "../hooks/mutations/usePostLike";
+import useDeleteLike from "../hooks/mutations/useDeleteLike";
+import { useState } from "react";
+import LpEditModal from "../components/LpEditModal";
 
 const LpDetailPage = () => {
+  const [isEditing, setIsEditing] = useState(false);
   const { id } = useParams();
+  const { accessToken } = useAuth();
   const lpId = Number(id);
   const navigate = useNavigate();
+  const { data: me } = useGetMyInfo(accessToken);
+
+  const { mutate: likeMutate } = usePostLike();
+  const { mutate: disLikeMutate } = useDeleteLike();
+
+  console.log(me);
 
   const { data: lp, isPending, isError } = useGetLpDetail(lpId);
+
+  const isLiked = lp?.likes.some((like: any) => like.userId === me?.data.id);
 
   const mutation = useMutation({
     mutationFn: () => deleteLp(lpId),
@@ -41,6 +57,14 @@ const LpDetailPage = () => {
     }
   };
 
+  const handleLikeLP = () => {
+    likeMutate({ lpId: Number(lpId) });
+  };
+
+  const handleDislikeLP = () => {
+    disLikeMutate({ lpId: Number(lpId) });
+  };
+
   return (
     <>
       <div className="flex justify-center px-4 py-10 text-white min-h-screen">
@@ -66,7 +90,11 @@ const LpDetailPage = () => {
           <div className="w-full flex justify-between items-start mb-4">
             <h1 className="text-lg font-semibold mb-4">{lp.title}</h1>
             <div className="flex gap-2">
-              <Edit2 size={16} className="cursor-pointer hover:text-pink-400" />
+              <Edit2
+                size={16}
+                className="cursor-pointer hover:text-pink-400"
+                onClick={() => setIsEditing(true)}
+              />
               <Trash2
                 size={16}
                 className="cursor-pointer hover:text-pink-400"
@@ -108,13 +136,18 @@ const LpDetailPage = () => {
           </div>
 
           <div className="flex items-center justify-center gap-2 text-lg">
-            ❤️ <span>{lp.likes?.length ?? 0}</span>
+            <button onClick={isLiked ? handleDislikeLP : handleLikeLP}>
+              <Heart color={"white"} fill={isLiked ? "white" : "transparent"} />
+            </button>
+            <span>{lp.likes?.length ?? 0}</span>
           </div>
         </div>
       </div>
       <div className="flex justify-center px-4 text-white min-h-screen">
         <LpCommentsSection lpId={lpId} />
       </div>
+
+      {isEditing && <LpEditModal lp={lp} onClose={() => setIsEditing(false)} />}
     </>
   );
 };

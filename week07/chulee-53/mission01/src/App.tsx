@@ -12,7 +12,6 @@ import GoogleLoginRedirectPage from "./pages/GoogleLoginRedirectPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import LpDetailPage from "./pages/LpDetailPage";
-import LpCreatePage from "./pages/LpCreatePage";
 
 const router = createBrowserRouter([
   {
@@ -27,7 +26,6 @@ const router = createBrowserRouter([
         children: [
           { path: "my", element: <MyPage /> },
           { path: "lps/:id", element: <LpDetailPage /> },
-          { path: "lps/create", element: <LpCreatePage /> },
         ],
       },
     ],
