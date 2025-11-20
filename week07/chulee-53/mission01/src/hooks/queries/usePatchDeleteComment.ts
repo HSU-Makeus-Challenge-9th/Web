@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../constants/key";
 import { deleteLpComment, patchLpComment } from "../../apis/comment";
-import { queryClient } from "./../../App";
+import { queryClient } from "../../App";
 
 export const usePatchComment = (lpId: number) => {
   const queryClient = useQueryClient();

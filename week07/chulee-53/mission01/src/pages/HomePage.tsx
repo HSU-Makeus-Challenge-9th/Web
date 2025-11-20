@@ -40,7 +40,7 @@ const HomePage = () => {
     <div className="container mx-auto px-4 py-6">
       <div className="mb-4 flex justify-end">
         <button
-          className={`px-4 py-2 rounded-md border ${
+          className={`px-4 py-2 cursor-pointer rounded-md border ${
             order === "asc" ? "bg-white text-black" : "bg-black"
           }`}
           onClick={() => setOrder(PAGINATION_ORDER.asc)}
@@ -49,7 +49,7 @@ const HomePage = () => {
         </button>
 
         <button
-          className={`px-4 py-2 rounded-md border ${
+          className={`px-4 py-2 cursor-pointer rounded-md border ${
             order === "desc" ? "bg-white text-black" : "bg-black"
           }`}
           onClick={() => setOrder(PAGINATION_ORDER.desc)}

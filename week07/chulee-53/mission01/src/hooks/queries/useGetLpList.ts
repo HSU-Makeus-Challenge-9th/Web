@@ -14,7 +14,7 @@ function useGetLpList({ cursor, search, order, limit }: PaginationDto) {
         limit,
       }),
     staleTime: 1000 * 60 * 5, // 5분
-    gcTime: 100 * 60 * 10, // 10분
+    gcTime: 1000 * 60 * 10, // 10분
     // enabled: Boolean(search),
 
     // retry: 쿼리 요청이 실패했을 때 자동으로 재시도할 횟수를 지정
