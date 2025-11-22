@@ -1,7 +1,7 @@
 import Button from '../../../../components/button/Button';
 import Input from '../../../../components/input/Input';
 import GoogleLoginButton from '../../../auth/components/GoogleLoginButton';
-import { useLoginForm } from '../../../../hooks/useForm';
+import { useLoginForm } from '../hooks/useLoginForm';
 import type { LoginData } from '../../../../types/auth/login';
 
 interface LoginFormProps {

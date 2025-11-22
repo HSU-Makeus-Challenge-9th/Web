@@ -80,3 +80,9 @@ export interface LikeResponse {
 }
 
 export type LikeApiResponse = ApiResponse<LikeResponse>;
+
+export type CreateLpResponse = ApiResponse<Lp>;
+
+export type UpdateLpResponse = ApiResponse<Lp>;
+
+export type DeleteLpResponse = ApiResponse<null>;

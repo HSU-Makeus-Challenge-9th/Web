@@ -30,7 +30,7 @@ const HomePage = () => {
   if (isError) return <Error message={error.message} />;
 
   const hasData =
-    data?.pages && data.pages.length > 0 && data.pages[0].data.length > 0;
+    data?.pages && data.pages.length > 0 && data.pages[0]?.data && data.pages[0].data.length > 0;
   const showSkeleton = isLoading || !hasData;
 
   return (
@@ -42,8 +42,8 @@ const HomePage = () => {
               <LpCardSkeleton key={index} />
             ))
           : data?.pages.map((page) =>
-              page.data.map((lp: Lp) => (
-                <LpCard key={`${page.nextCursor}-${lp.id}`} lp={lp} />
+              page?.data.map((lp: Lp) => (
+                <LpCard key={`${page?.nextCursor}-${lp.id}`} lp={lp} />
               ))
             )}
       </div>

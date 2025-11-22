@@ -5,9 +5,11 @@ import type { GetLpsParams } from '../../types/lp';
 export const useLps = (params: GetLpsParams) => {
   return useInfiniteQuery({
     queryKey: ['lps', params],
-    queryFn: ({ pageParam }) => getLps({ ...params, cursor: pageParam }),
-    initialPageParam: undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    queryFn: ({ pageParam }: { pageParam: number | undefined }) =>
+      getLps({ ...params, cursor: pageParam }),
+    initialPageParam: undefined as number | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNext ? lastPage.nextCursor : undefined,
     staleTime: 1000 * 60,
     gcTime: 1000 * 60 * 5,
   });

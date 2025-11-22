@@ -114,9 +114,27 @@ const handleResponseError = async (error: AxiosError) => {
   return Promise.reject(error);
 };
 
-API.interceptors.response.use((response) => response, handleResponseError);
+const normalizeResponse = (response: any) => {
+  if (
+    response.data &&
+    typeof response.data === 'object' &&
+    'data' in response.data
+  ) {
+    return {
+      ...response,
+
+      normalizedData: response.data.data,
+    };
+  }
+  return response;
+};
+
+API.interceptors.response.use(
+  (response) => normalizeResponse(response),
+  handleResponseError
+);
 
 PrivateAPI.interceptors.response.use(
-  (response) => response,
+  (response) => normalizeResponse(response),
   handleResponseError
 );

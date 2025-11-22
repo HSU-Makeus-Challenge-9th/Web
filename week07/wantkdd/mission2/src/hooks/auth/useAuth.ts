@@ -1,43 +1,52 @@
-import { PrivateAPI } from '../../apis/axios';
 import { useAuthStore } from '../../store/authStore';
-import { useEffect, useState, useCallback } from 'react';
-
-let isFetching = false; //후속 중복 요청 방지
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getUserMe } from '../../apis/auth';
 
 export const useAuth = () => {
   const { user, isLoggedIn, setUser, setIsLoggedIn } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchUser = useCallback(async () => {
-    if (isFetching) return;
+  const hasToken = () => {
+    const token = localStorage.getItem('accessToken');
+    return !!token;
+  };
 
-    isFetching = true;
-    setIsLoading(true);
-    try {
-      const response = await PrivateAPI.get('/users/me');
-      if (response.data.status) {
-        setUser(response.data.data);
-        setIsLoggedIn(true);
-      } else {
-        setUser(null);
-        setIsLoggedIn(false);
-      }
-    } catch {
-      setUser(null);
-      setIsLoggedIn(false);
-    } finally {
-      setIsLoading(false);
-      isFetching = false;
-    }
-  }, [setUser, setIsLoggedIn]);
+  // 토큰이 있고 아직 로그인 상태가 아닐 때만 사용자 정보 조회
+  const shouldFetchUser = hasToken() && !isLoggedIn;
+
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ['user', 'me'],
+    queryFn: getUserMe,
+    enabled: shouldFetchUser,
+    retry: false,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+  });
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token && !isLoggedIn) {
-      fetchUser();
-    } else {
-      setIsLoading(false);
+    if (data) {
+      setUser(data);
+      setIsLoggedIn(true);
+    } else if (isError) {
+      setUser(null);
+      setIsLoggedIn(false);
     }
-  }, [isLoggedIn, fetchUser]);
-  return { user, isLoggedIn, fetchUser, setIsLoggedIn, setUser, isLoading };
+  }, [data, isError, setUser, setIsLoggedIn]);
+
+  const fetchUser = async () => {
+    const result = await refetch();
+    return result;
+  };
+
+  // 토큰이 없으면 즉시 로딩 완료로 처리 (API 호출하지 않음)
+  const actualIsLoading = shouldFetchUser ? isLoading : false;
+
+  return {
+    user,
+    isLoggedIn,
+    fetchUser,
+    setIsLoggedIn,
+    setUser,
+    isLoading: actualIsLoading
+  };
 };
