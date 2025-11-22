@@ -1,0 +1,188 @@
+name: Gemini Automated Code Review
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - main
+
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: '리뷰할 PR 번호 (기존 PR 수동 리뷰 시 입력)'
+        required: false
+
+jobs:
+  code_review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install GoogleGenerativeAI SDK
+        run: npm install @google/generative-ai@latest
+
+      - name: Determine PR Info
+        id: pr_info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let pr_number;
+
+            if (context.eventName === "workflow_dispatch") {
+              pr_number = context.payload.inputs["pr_number"];
+              if (!pr_number) {
+                core.setFailed("❌ 수동 실행 시에는 PR 번호 입력이 필요합니다.");
+                return;
+              }
+            } else {
+              pr_number = context.payload.pull_request.number;
+            }
+
+            console.log(`🔍 리뷰할 PR 번호: ${pr_number}`);
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr_number
+            });
+
+            console.log(`📂 base: ${pr.base.ref}, head: ${pr.head.ref}`);
+
+            core.setOutput("number", pr_number);
+            core.setOutput("base", pr.base.ref);
+            core.setOutput("head", pr.head.ref);
+
+      - name: Generate Git Diff for PR
+        run: |
+          echo "📂 base: ${{ steps.pr_info.outputs.base }}"
+          echo "📂 head: ${{ steps.pr_info.outputs.head }}"
+          git fetch origin "${{ steps.pr_info.outputs.base }}"
+          git fetch origin "${{ steps.pr_info.outputs.head }}"
+          git diff "origin/${{ steps.pr_info.outputs.base }}"..."origin/${{ steps.pr_info.outputs.head }}" > diff.txt
+
+      - name: Run Gemini Review
+        id: gemini_review
+        uses: actions/github-script@v7
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          script: |
+            const fs = require("fs");
+            const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+            const diff_output = fs.readFileSync("diff.txt", "utf8");
+            if (!diff_output.trim()) {
+              console.log("No code changes detected, skipping review.");
+              fs.writeFileSync("review_result.txt", "변경된 코드가 없어 리뷰를 건너뜁니다.");
+              return;
+            }
+
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+            const chunkSize = 90000;
+            const chunks = [];
+            for (let i = 0; i < diff_output.length; i += chunkSize) {
+              chunks.push(diff_output.slice(i, i + chunkSize));
+            }
+
+            let allReviews = [];
+            console.log(`📦 ${chunks.length}개의 청크로 분할 완료`);
+
+            for (let i = 0; i < chunks.length; i++) {
+              const partPrompt = `
+              당신은 **시니어 프론트엔드 개발자**입니다.
+              아래는 Pull Request diff의 일부입니다 (파트 ${i + 1}/${chunks.length}).
+
+              변경 내용을 면밀히 검토하고 아래 항목 중심으로 리뷰하세요:
+              1. 무조건 src 내부에 있는 .ts 및 .tsx 파일만 리뷰합니다.
+              2. 성능 문제
+              3. 타입스크립트 문법 / 타입 개선점
+              4. 변수명, 함수명, 주석 품질
+              5. 중복 코드 및 리팩토링 포인트
+              6. 구체적 개선 제안 (최소 5개 이상 8개 이하)
+
+              <diff part ${i + 1}>
+              ${chunks[i]}
+              </diff>
+              `;
+
+              console.log(`🤖 Gemini에 part ${i + 1} 요청 중...`);
+              const res = await model.generateContent(partPrompt);
+              const text = res.response.text();
+              allReviews.push(`### Part ${i + 1}\n${text}`);
+            }
+
+            const summaryPrompt = `
+            다음은 코드 리뷰 파트별 결과입니다.
+            이를 통합하여 **하나의 완성된 리뷰**로 정리하세요.
+
+            - 중복 피드백은 병합
+            - 파일별로 정리
+            - 명확하고 간결하게 유지
+
+            ${allReviews.join("\n\n")}
+            `;
+
+            console.log("🧠 Gemini에게 최종 리뷰 요약 요청 중...");
+            const summaryRes = await model.generateContent(summaryPrompt);
+            const finalText = summaryRes.response.text();
+
+            fs.writeFileSync("review_result.txt", finalText);
+            console.log("✅ Gemini 리뷰 결과 저장 완료 (전체 diff 포함)");
+
+      - name: Comment on Pull Request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const review = fs.readFileSync("review_result.txt", "utf8");
+
+            const pr_number = ${{ steps.pr_info.outputs.number }};
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            console.log(`🗣️ Gemini 코드리뷰 업데이트 on PR #${pr_number}`);
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: pr_number
+            });
+
+            const existing = comments.find(c =>
+              c.user?.type === "Bot" &&
+              c.body?.startsWith("## 🤖 Gemini 코드리뷰 결과")
+            );
+
+            if (existing) {
+              console.log(`♻️ 기존 Gemini 리뷰 코멘트(#${existing.id}) 수정 중...`);
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body: `## 🤖 Gemini 코드리뷰 결과\n${review}`
+              });
+            } else {
+              console.log("💬 기존 Gemini 리뷰 코멘트 없음 — 새로 작성");
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr_number,
+                body: `## 🤖 Gemini 코드리뷰 결과\n${review}`
+              });
+            }
+
+            console.log("✅ Gemini 리뷰 코멘트 갱신 완료");
