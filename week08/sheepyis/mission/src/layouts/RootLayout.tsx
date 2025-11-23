@@ -6,9 +6,11 @@ import AddButton from "../components/Common/Button/AddButton/AddButton";
 import AddModal from "../components/Common/Modal/AddModal/AddModal";
 import DeleteModal from "../components/Common/Modal/DeleteModal/DeleteModal";
 import { useDeleteUserMutation } from "../hooks/auth/useDeleteUserMutation";
+import { useSidebar } from "../hooks/sidebar/useSidebar";
 
 const RootLayout = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { isOpen, toggle, close } = useSidebar();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -17,13 +19,15 @@ const RootLayout = () => {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
+
       if (target.closest(".sidebar") || target.closest(".hamburger")) return;
-      setIsSidebarOpen(false);
+
+      close();
     };
 
-    if (isSidebarOpen) document.addEventListener("click", handleClickOutside);
+    if (isOpen) document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
-  }, [isSidebarOpen]);
+  }, [isOpen, close]);
 
   const handleDeleteConfirm = () => {
     deleteUser();
@@ -32,14 +36,18 @@ const RootLayout = () => {
 
   return (
     <>
-      <Header onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)} />
+      <Header onToggleSidebar={toggle} />
       <div className="flex relative h-[calc(100vh-5vw)] overflow-hidden">
         <SideBar
-          isOpen={isSidebarOpen}
+          isOpen={isOpen}
           onDeleteClick={() => setIsDeleteModalOpen(true)}
         />
 
-        <div className="flex-1 overflow-y-auto px-[2vw] py-[1vw]">
+        <div
+          className={`flex-1 px-[2vw] py-[1vw] transition-all ${
+            isOpen ? "overflow-hidden" : "overflow-y-auto"
+          }`}
+        >
           <Outlet />
         </div>
 

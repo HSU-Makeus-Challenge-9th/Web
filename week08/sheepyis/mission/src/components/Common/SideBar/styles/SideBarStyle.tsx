@@ -1,7 +1,8 @@
 export const SidebarWrapper = `
     sidebar fixed left-0 top-[5vw] md:top-0 z-50 
-    transition-transform duration-300
+    transition-all duration-300
     md:relative md:translate-x-0
+    ease-in-out
 `;
 
 export const SideBarContainer = `
