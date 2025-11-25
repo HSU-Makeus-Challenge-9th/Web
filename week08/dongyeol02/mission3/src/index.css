@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+.no-scroll {
+  overflow: hidden;
+}
+
+.no-scroll {
+  overflow-y: hidden;
+
+  padding-right: 15px;
+}
