@@ -15,6 +15,12 @@ export const postSignup = async (
   return data;
 };
 
+// export const postSignin = async (
+//   body: RequestSigninDto
+// ): Promise<ResponseSigninDto> => {
+//   const { data } = await axiosInstance.post("/v1/auth/signin", body);
+//   return data;
+// };
 export const postSignin = async (
   body: RequestSigninDto
 ): Promise<ResponseSigninDto> => {

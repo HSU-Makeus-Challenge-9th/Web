@@ -1,14 +1,22 @@
-import { postSignin } from "../apis/auth";
+// import { postSignin } from "../apis/auth";
 import useForm from "../hooks/useForm";
 import { validateSignin, type UserSigninInformation } from "../utils/validate";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // 🚀 ADDED: useLocation 추가
 import type { RequestSigninDto } from "../types/auth";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+// 가상의 RequestSignInDto (AuthContext에서 사용되는 타입)
+interface RequestSignInDto {
+  email: string;
+  password: string;
+}
+
 function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation(); // 🚀 ADDED: useLocation 훅 사용
+
   const { values, errors, touched, getInputProps } =
     useForm<UserSigninInformation>({
       initialValue: {
@@ -18,8 +26,17 @@ function LoginPage() {
       validate: validateSignin,
     });
 
+  // AuthGuard에서 전달된 'from' 경로를 가져옵니다. 기본값은 '/'
+  const from = location.state?.from || "/";
+
   const handleSubmit = async () => {
-    await login(values);
+    // 🚀 MODIFIED: login 함수 호출 및 성공 여부 확인 (AuthContext 수정 반영)
+    const success = await login(values as RequestSignInDto);
+
+    if (success) {
+      // 로그인 성공 후, 'from' 경로로 리디렉션 (원래 가려던 페이지로 복귀)
+      navigate(from, { replace: true });
+    }
   };
 
   // 오류가 하나라도 있거나, 입력값이 비어있으면 버튼 비활성화
@@ -47,7 +64,7 @@ function LoginPage() {
           <img
             src="https://img.icons8.com/color/512/google-logo.png"
             className="w-6 h-6 absolute left-4"
-          ></img>
+          />
           구글 로그인
         </button>
 
@@ -99,6 +116,3 @@ function LoginPage() {
 }
 
 export default LoginPage;
-// function useNavigate() {
-//   throw new Error("Function not implemented.");
-// }
