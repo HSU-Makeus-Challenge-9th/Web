@@ -9,7 +9,7 @@ const Brand = ({ onClick, title = 'WAN LP' }: BrandProps) => {
   return (
     <button
       onClick={onClick}
-      className="text-pink-500 font-bold text-[2vw] cursor-pointer"
+      className="text-pink-500 font-bold text-lg md:text-xl lg:text-2xl cursor-pointer"
     >
       {title}
     </button>
