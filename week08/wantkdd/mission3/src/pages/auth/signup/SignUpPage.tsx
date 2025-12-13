@@ -3,20 +3,14 @@ import Button from '../../../components/button/Button';
 import Animation from '../../../components/animation/Animation';
 import SignUpForm from './components/SignUpForm';
 import type { SignUpRequestBody } from '../../../types/auth/signup';
-import { signUp } from '../../../apis/auth';
+import { useSignUpMutation } from '../../../hooks/auth/useSignUpMutation';
 
 const SignUpPage = () => {
   const navigate = useNavigate();
+  const { mutate: signUp } = useSignUpMutation();
 
-  const handleSignUpComplete = async (data: SignUpRequestBody) => {
-    try {
-      console.log('회원가입 데이터:', data);
-      const response = await signUp(data);
-      console.log('회원가입 성공:', response);
-      navigate('/');
-    } catch (error) {
-      console.error('회원가입 실패:', error);
-    }
+  const handleSignUpComplete = (data: SignUpRequestBody) => {
+    signUp(data);
   };
 
   return (
