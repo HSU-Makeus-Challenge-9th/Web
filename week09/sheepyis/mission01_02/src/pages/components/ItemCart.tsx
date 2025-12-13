@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux";
-import { increase, decrease } from "../../store/cartSlice";
+import { increase, decrease } from "../../features/cart/cartSlice";
 import type { CartItem } from "../../types/cart";
 
 interface ItemProps {
@@ -14,8 +14,8 @@ const ItemCart = ({ item }: ItemProps) => {
       <div className="flex gap-2 items-center">
         <img className="w-18 h-18 rounded-md" src={item.img} alt={item.title} />
 
-        <div className="flex flex-col gap-0.9">
-          <p className="font-bold">{item.title}</p>
+        <div className="flex flex-col gap-0.9 max-w-[80%]">
+          <p className="font-bold truncate">{item.title}</p>
           <p className="text-xs text-gray-500 font-semibold">{item.singer}</p>
           <p className="font-bold text-sm">
             ${Number(item.price).toLocaleString()}

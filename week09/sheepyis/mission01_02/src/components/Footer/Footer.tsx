@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import { clearCart } from "../../store/cartSlice";
+import { openModal } from "../../features/modal/modalSlice";
 
 const Footer = () => {
   const dispatch = useDispatch();
@@ -10,7 +10,7 @@ const Footer = () => {
     <div className="flex justify-between items-center">
       <button
         className="border border-black font-bold p-1 rounded-sm cursor-pointer"
-        onClick={() => dispatch(clearCart())}
+        onClick={() => dispatch(openModal())}
       >
         전체 삭제
       </button>

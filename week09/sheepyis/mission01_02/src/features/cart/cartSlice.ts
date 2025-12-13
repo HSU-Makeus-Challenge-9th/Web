@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
-import cartItems from "../constants/cartItems";
+import cartItems from "../../constants/cartItems";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { CartState, CartItem } from "../types/cart";
+import type { CartState, CartItem } from "../../types/cart";
 
 const calculate = (items: CartItem[]) => {
   return items.reduce(
