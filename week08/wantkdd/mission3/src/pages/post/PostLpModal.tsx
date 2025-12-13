@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useCreateLp } from '../../hooks/lp/useCreateLp';
+import { useFilePreview } from '../../hooks/useFilePreview';
+import { useTagsManager } from '../../hooks/useTagsManager';
 import Button from '../../components/button/Button';
 import Input from '../../components/input/Input';
 import Modal from '../../components/modal/Modal';
@@ -13,11 +15,19 @@ interface PostLpModalProps {
 }
 
 const PostLpModal = ({ isOpen, onClose }: PostLpModalProps) => {
-  const [preview, setPreview] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
+
+  const {
+    previewUrl: preview,
+    file: selectedFile,
+    updateFile: setSelectedFile,
+    resetPreview,
+  } = useFilePreview({
+    useFileReader: false,
+  });
+
+  const { tags, handleAddTag, handleRemoveTag, resetTags } = useTagsManager();
 
   const createLpMutation = useCreateLp();
 
@@ -25,17 +35,7 @@ const PostLpModal = ({ isOpen, onClose }: PostLpModalProps) => {
     title.trim() && content.trim() && tags.length > 0 && selectedFile;
 
   const handleFileChange = (file: File) => {
-    const previewUrl = URL.createObjectURL(file);
-    setPreview(previewUrl);
     setSelectedFile(file);
-  };
-
-  const handleAddTag = (tag: string) => {
-    setTags((prev) => [...prev, tag]);
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,9 +67,8 @@ const PostLpModal = ({ isOpen, onClose }: PostLpModalProps) => {
             onClose();
             setTitle('');
             setContent('');
-            setTags([]);
-            setPreview(null);
-            setSelectedFile(null);
+            resetTags();
+            resetPreview();
           },
           onError: (error) => {
             alert('LP를 불러오는데 실패했습니다.: ' + error.message);

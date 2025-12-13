@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useUpdateUserMutation } from '../../hooks/auth/useUpdateUserMutation';
+import { useFilePreview } from '../../hooks/useFilePreview';
 import { uploadImage } from '../../apis/upload';
 import Button from '../../components/button/Button';
 import LoadingSpinner from '../../components/spinner/LoadingSpinner';
@@ -13,37 +14,32 @@ const MyPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user && !avatarFile) {
-      setPreviewAvatar(user.avatar || null);
-    }
-  }, [user, avatarFile]);
+  const {
+    previewUrl: previewAvatar,
+    file: avatarFile,
+    updateFile: setAvatarFile,
+    resetPreview,
+  } = useFilePreview({
+    initialUrl: user?.avatar,
+    useFileReader: true,
+  });
 
   const handleEditClick = () => {
     if (!user) return;
     setName(user.name);
     setBio(user.bio || '');
-    setPreviewAvatar(user.avatar);
-    setAvatarFile(null);
+    resetPreview();
     setIsEditing(true);
   };
 
   const handleCancelClick = () => {
     setIsEditing(false);
-    setAvatarFile(null);
-    setPreviewAvatar(user?.avatar || null);
+    resetPreview();
   };
 
   const handleAvatarFileChange = (file: File) => {
     setAvatarFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviewAvatar(reader.result as string);
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleSaveClick = async () => {
@@ -64,7 +60,7 @@ const MyPage = () => {
       {
         onSuccess: () => {
           setIsEditing(false);
-          setAvatarFile(null);
+          resetPreview();
         },
       }
     );

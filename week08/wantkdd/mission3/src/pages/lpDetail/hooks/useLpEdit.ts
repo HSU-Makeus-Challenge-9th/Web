@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { uploadImage } from '../../../apis/upload';
 import { useUpdateLpMutation } from '../../../hooks/lp/useUpdateLpMutation';
+import { useFilePreview } from '../../../hooks/useFilePreview';
+import { useTagsManager } from '../../../hooks/useTagsManager';
 import type { Lp } from '../../../types/lp';
 
 interface FormValues {
@@ -11,14 +13,22 @@ interface FormValues {
 
 export const useLpEdit = (lp: Lp | undefined, lpId: number) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [previewThumbnail, setPreviewThumbnail] = useState<string | null>(null);
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [tags, setTags] = useState<string[]>([]);
 
   const { register, handleSubmit, reset } = useForm<FormValues>();
   const { mutate: updateLp, isPending: isUpdating } = useUpdateLpMutation();
 
-  // LP 데이터 초기화
+  const {
+    previewUrl: previewThumbnail,
+    file: thumbnailFile,
+    updateFile: setThumbnailFile,
+    resetPreview,
+  } = useFilePreview({
+    initialUrl: lp?.thumbnail,
+    useFileReader: true,
+  });
+
+  const { tags, handleAddTag, handleRemoveTag, resetTags } = useTagsManager();
+
   useEffect(() => {
     if (lp) {
       const tagNames = lp.tags?.map((tag) => tag.name) || [];
@@ -26,32 +36,13 @@ export const useLpEdit = (lp: Lp | undefined, lpId: number) => {
         title: lp.title,
         content: lp.content,
       });
-      setTags(tagNames);
-      setPreviewThumbnail(lp.thumbnail);
+      resetTags(tagNames);
+      resetPreview();
     }
-  }, [lp, reset]);
-
-  // 파일 미리보기
-  useEffect(() => {
-    if (thumbnailFile) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewThumbnail(reader.result as string);
-      };
-      reader.readAsDataURL(thumbnailFile);
-    }
-  }, [thumbnailFile]);
+  }, [lp, reset, resetPreview, resetTags]);
 
   const handleFileChange = (file: File) => {
     setThumbnailFile(file);
-  };
-
-  const handleAddTag = (tag: string) => {
-    setTags((prev) => [...prev, tag]);
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
   };
 
   const handleEdit = () => {
@@ -65,9 +56,8 @@ export const useLpEdit = (lp: Lp | undefined, lpId: number) => {
         title: lp.title,
         content: lp.content,
       });
-      setTags(lp.tags?.map((tag) => tag.name) || []);
-      setPreviewThumbnail(lp.thumbnail);
-      setThumbnailFile(null);
+      resetTags(lp.tags?.map((tag) => tag.name) || []);
+      resetPreview();
     }
   };
 
@@ -91,7 +81,7 @@ export const useLpEdit = (lp: Lp | undefined, lpId: number) => {
       {
         onSuccess: () => {
           setIsEditing(false);
-          setThumbnailFile(null);
+          resetPreview();
         },
       }
     );
