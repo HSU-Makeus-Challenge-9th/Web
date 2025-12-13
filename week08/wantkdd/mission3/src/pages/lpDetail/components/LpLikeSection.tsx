@@ -13,7 +13,7 @@ const LpLikeSection = ({
   onLikeToggle,
 }: LpLikeSectionProps) => {
   return (
-    <div className="flex items-center justify-center gap-[0.8vw]">
+    <div className="flex items-center justify-center gap-2 md:gap-3">
       <button
         type="button"
         onClick={onLikeToggle}
@@ -24,7 +24,7 @@ const LpLikeSection = ({
           className={cn(isLiked ? 'fill-current' : 'fill-none')}
         />
       </button>
-      <span className="font-bold text-[1.3vw]">{likeCount}</span>
+      <span className="font-bold text-lg md:text-xl">{likeCount}</span>
     </div>
   );
 };

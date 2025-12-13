@@ -69,7 +69,7 @@ const RootLayout = () => {
 
       <main
         className={`pt-16 min-h-[calc(100vh-4rem)] bg-black transition-all duration-300 ${
-          isOpen && isLargeScreen && !isAuthPage ? 'lg:pl-[18vw]' : ''
+          isOpen && isLargeScreen && !isAuthPage ? 'lg:pl-64' : ''
         }`}
       >
         <Outlet />
@@ -78,10 +78,10 @@ const RootLayout = () => {
       {!isAuthPage && (
         <button
           onClick={handleFloatingButtonClick}
-          className="fixed bottom-[3vw] right-[3vw] w-[4vw] h-[4vw] min-w-14 min-h-14 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
+          className="fixed bottom-6 right-6 w-14 h-14 md:w-16 md:h-16 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
           aria-label="LP 추가"
         >
-          <PlusCircle className="w-[60%] h-[60%]" />
+          <PlusCircle className="w-8 h-8 md:w-10 md:h-10" />
         </button>
       )}
       <PostLpModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />

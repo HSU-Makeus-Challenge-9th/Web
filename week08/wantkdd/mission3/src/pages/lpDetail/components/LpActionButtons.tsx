@@ -23,7 +23,7 @@ const LpActionButtons = ({
   if (!isAuthor) return null;
 
   return (
-    <div className="flex gap-[1.5vw] text-gray-400">
+    <div className="flex gap-2 md:gap-4 text-gray-400">
       {isEditing ? (
         <>
           <Button

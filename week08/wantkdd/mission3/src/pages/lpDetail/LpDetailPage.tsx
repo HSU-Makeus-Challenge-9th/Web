@@ -58,8 +58,8 @@ const LpDetailPage = () => {
 
   return (
     <>
-      <div className="min-h-full max-w-[60vw] mx-auto py-[3vh] px-[3vw] relative">
-        <div className="bg-[#2c2c2c] rounded-lg p-[3vw] text-white">
+      <div className="min-h-full max-w-4xl mx-auto py-6 md:py-8 px-4 md:px-6 relative">
+        <div className="bg-[#2c2c2c] rounded-lg p-4 md:p-6 lg:p-8 text-white">
           <form onSubmit={handleSubmit(onSubmit)}>
             <LpHeader
               author={{
@@ -95,7 +95,7 @@ const LpDetailPage = () => {
               register={register('content', { required: true })}
             />
 
-            <div className="mb-[5vh] max-w-md mx-auto">
+            <div className="mb-8 md:mb-10 max-w-md mx-auto">
               {isEditing ? (
                 <TagInput
                   tags={tags}
@@ -105,11 +105,11 @@ const LpDetailPage = () => {
                   label="LP 태그"
                 />
               ) : (
-                <div className="flex justify-center gap-[0.8vw] flex-wrap">
+                <div className="flex justify-center gap-2 md:gap-3 flex-wrap">
                   {lp.tags?.map((tag) => (
                     <span
                       key={tag.id}
-                      className="bg-gray-600 text-gray-300 px-[1.5vw] py-[0.5vh] rounded-full text-[0.9vw]"
+                      className="bg-gray-600 text-gray-300 px-3 md:px-4 py-1 md:py-1.5 rounded-full text-sm md:text-base"
                     >
                       #{tag.name}
                     </span>
