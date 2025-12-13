@@ -1,6 +1,6 @@
 import { PrivateAPI } from './axios';
+import type { ApiResponse } from '../types/lp';
 import type {
-  CommentListResponse,
   CommentPaginationData,
   GetCommentsParams,
   CreateCommentParams,
@@ -11,20 +11,19 @@ import type {
   DeleteCommentResponse,
 } from '../types/comment';
 
-//lp 댓글 조회
 export const getLpComments = async ({
   lpId,
   cursor = 0,
   limit = 10,
   order = 'asc',
 }: GetCommentsParams): Promise<CommentPaginationData> => {
-  const response = await PrivateAPI.get<CommentListResponse>(
+  const response = await PrivateAPI.get<ApiResponse<CommentPaginationData>>(
     `/lps/${lpId}/comments`,
     {
       params: { cursor, limit, order },
     }
   );
-  return response.data.data;
+  return response.data;
 };
 
 // 댓글 작성

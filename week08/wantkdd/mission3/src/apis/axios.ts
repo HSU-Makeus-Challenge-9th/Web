@@ -32,7 +32,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     refresh: parsedRefreshToken,
   });
 
-  const { accessToken } = response.data.data;
+  const { accessToken } = response.data;
 
   localStorage.setItem(
     LOCAL_STORAGE_KEY.accessToken,
@@ -42,7 +42,6 @@ const refreshAccessToken = async (): Promise<string | null> => {
   return accessToken;
 };
 
-// 요청 인터셉터
 PrivateAPI.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem(LOCAL_STORAGE_KEY.accessToken);
@@ -52,8 +51,10 @@ PrivateAPI.interceptors.request.use(
         const parsedToken = JSON.parse(accessToken);
         config.headers.Authorization = `Bearer ${parsedToken}`;
       } catch (error) {
-        console.log(error);
-        config.headers.Authorization = `Bearer ${accessToken}`;
+        console.error('Invalid token format:', error);
+        useAuthStore.getState().logout();
+        window.location.href = '/login';
+        return Promise.reject(new Error('Invalid token format'));
       }
     }
 
@@ -66,14 +67,11 @@ PrivateAPI.interceptors.request.use(
 
 // 응답 인터셉터
 const handleResponseError = async (error: AxiosError) => {
-  // 네트워크 에러 처리
   if (axios.isAxiosError(error) && !error.response) {
     return Promise.reject(new Error('서버에 연결할 수 없습니다.'));
   }
 
-  const originalRequest = error.config as typeof error.config & {
-    _retry?: boolean;
-  };
+  const originalRequest = error.config;
 
   // 401 에러 처리 (토큰 만료)
   if (
@@ -122,8 +120,7 @@ const normalizeResponse = (response: any) => {
   ) {
     return {
       ...response,
-
-      normalizedData: response.data.data,
+      data: response.data.data,
     };
   }
   return response;

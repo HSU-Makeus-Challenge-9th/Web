@@ -1,7 +1,7 @@
 import { API, PrivateAPI } from './axios';
 import type { SignUpRequestBody, SignUpResponse } from '../types/auth/signup';
 import type { LoginData, LoginResponse } from '../types/auth/login';
-import type { UpdateUserRequest, User, UserResponse } from '../types/auth/user';
+import type { UpdateUserRequest, User } from '../types/auth/user';
 import type { ApiResponse } from '../types/lp';
 
 // 회원가입 API
@@ -26,16 +26,14 @@ export const deleteUser = async (): Promise<void> => {
   await PrivateAPI.delete<ApiResponse<null>>('/users');
 };
 
-// 현재 유저 정보 조회 API
 export const getUserMe = async (): Promise<User> => {
-  const response = await PrivateAPI.get<UserResponse>('/users/me');
-  return response.data.data;
+  const response = await PrivateAPI.get<ApiResponse<User>>('/users/me');
+  return response.data;
 };
 
-// 유저 정보 수정 API
 export const updateUser = async (
   data: UpdateUserRequest
 ): Promise<User> => {
-  const response = await PrivateAPI.patch<UserResponse>('/users', data);
-  return response.data.data;
+  const response = await PrivateAPI.patch<ApiResponse<User>>('/users', data);
+  return response.data;
 };

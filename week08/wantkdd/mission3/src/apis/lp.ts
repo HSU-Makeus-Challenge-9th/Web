@@ -13,40 +13,34 @@ import type {
   LikeApiResponse,
 } from '../types/lp';
 
-//lp 목록 조회
 export const getLps = async (params: GetLpsParams): Promise<LpPaginationData> => {
   const { data } = await API.get('/lps', { params });
-  return data.data;
+  return data;
 };
 
-//태그별 lp 목록 조회
 export const getLpsByTag = async (params: GetLpsByTagParams): Promise<LpPaginationData> => {
   const { tagName, ...queryParams } = params;
   const { data } = await API.get(`/lps/tag/${tagName}`, { params: queryParams });
-  return data.data;
+  return data;
 };
 
-//lp 상세 정보 조회
 export const getLpDetail = async (lpId: number): Promise<Lp> => {
   const response = await PrivateAPI.get<LpDetailResponse>(`/lps/${lpId}`);
-  return response.data.data;
+  return response.data;
 };
 
-// lp 생성
 export const createLp = async (lpData: CreateLpRequest): Promise<Lp> => {
   const response = await PrivateAPI.post<CreateLpResponse>('/lps', lpData);
-  return response.data.data;
+  return response.data;
 };
 
-// lp 삭제
 export const deleteLp = async (lpId: number): Promise<void> => {
   await PrivateAPI.delete<DeleteLpResponse>(`/lps/${lpId}`);
 };
 
-// lp 수정
 export const updateLp = async (lpId: number, lpData: UpdateLpRequest): Promise<Lp> => {
   const response = await PrivateAPI.patch<UpdateLpResponse>(`/lps/${lpId}`, lpData);
-  return response.data.data;
+  return response.data;
 };
 
 // lp 좋아요
