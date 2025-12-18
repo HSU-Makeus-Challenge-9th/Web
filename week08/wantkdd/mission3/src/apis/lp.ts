@@ -26,12 +26,12 @@ export const getLpsByTag = async (params: GetLpsByTagParams): Promise<LpPaginati
 
 export const getLpDetail = async (lpId: number): Promise<Lp> => {
   const response = await PrivateAPI.get<LpDetailResponse>(`/lps/${lpId}`);
-  return response.data;
+  return response.data.data;
 };
 
 export const createLp = async (lpData: CreateLpRequest): Promise<Lp> => {
   const response = await PrivateAPI.post<CreateLpResponse>('/lps', lpData);
-  return response.data;
+  return response.data.data;
 };
 
 export const deleteLp = async (lpId: number): Promise<void> => {
@@ -40,7 +40,7 @@ export const deleteLp = async (lpId: number): Promise<void> => {
 
 export const updateLp = async (lpId: number, lpData: UpdateLpRequest): Promise<Lp> => {
   const response = await PrivateAPI.patch<UpdateLpResponse>(`/lps/${lpId}`, lpData);
-  return response.data;
+  return response.data.data;
 };
 
 // lp 좋아요
