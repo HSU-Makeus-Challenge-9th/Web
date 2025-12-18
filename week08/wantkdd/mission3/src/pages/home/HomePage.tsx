@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLps } from '../../hooks/lp/useLps';
 import type { GetLpsParams, Lp } from '../../types/lp';
 import Error from '../../components/error/Error';
@@ -9,6 +9,10 @@ import OrderSelector from '../../components/orderSelector/OrderSelector';
 
 const HomePage = () => {
   const [order, setOrder] = useState<GetLpsParams['order']>('desc');
+
+  const handleOrderChange = useCallback((newOrder: 'asc' | 'desc') => {
+    setOrder(newOrder);
+  }, []);
   const {
     data,
     fetchNextPage,
@@ -67,7 +71,7 @@ const HomePage = () => {
 
   return (
     <div className="p-4">
-      <OrderSelector order={order} onOrderChange={setOrder} />
+      <OrderSelector order={order} onOrderChange={handleOrderChange} />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {showSkeleton
           ? Array.from({ length: 20 }).map((_, index) => (

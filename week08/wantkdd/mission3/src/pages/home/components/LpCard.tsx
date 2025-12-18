@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import type { Lp } from '../../../types/lp';
 import Skeleton from '../../../components/skeleton/Skeleton';
 import clsx from 'clsx';
@@ -31,7 +31,9 @@ const LpCard = ({ lp }: LpCardProps) => {
     };
   }, [lp.thumbnail]);
 
-  const handleClick = () => navigate(`/lp/${lp.id}`);
+  const handleClick = useCallback(() => {
+    navigate(`/lp/${lp.id}`);
+  }, [navigate, lp.id]);
 
   return (
     <div
@@ -55,4 +57,4 @@ const LpCard = ({ lp }: LpCardProps) => {
   );
 };
 
-export default LpCard;
+export default memo(LpCard);
