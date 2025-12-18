@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
 import useGetInfiniteLpComments from "../hooks/queries/useGetInfiniteLpComments";
@@ -36,7 +36,7 @@ const LpComments = () => {
     triggerOnce: false,
   });
 
-  const handleAddCommentClick = () => {
+  const handleAddCommentClick = useCallback(() => {
     postMutate(commentText, {
       onSuccess: () => {
         setCommentText("");
@@ -45,56 +45,65 @@ const LpComments = () => {
         alert("댓글 작성에 실패했습니다. 다시 시도해주세요.");
       },
     });
-  };
+  }, [commentText, postMutate]);
 
-  const handleEditClick = (commentId: number, currentContent: string) => {
-    setEditingCommentId(commentId);
-    setEditText(currentContent);
-    setOpenCommentId(null); // 툴팁 닫기
-  };
+  const handleEditClick = useCallback(
+    (commentId: number, currentContent: string) => {
+      setEditingCommentId(commentId);
+      setEditText(currentContent);
+      setOpenCommentId(null); // 툴팁 닫기
+    },
+    []
+  );
 
-  const handleSaveEdit = (commentId: number) => {
-    if (!editText.trim()) {
-      alert("댓글 내용을 입력해주세요.");
-      return;
-    }
-
-    patchMutate(
-      {
-        lpId,
-        commentId,
-        content: editText,
-      },
-      {
-        onSuccess: () => {
-          setEditingCommentId(null);
-          setEditText("");
-        },
-        onError: () => {
-          alert("댓글 수정에 실패했습니다. 다시 시도해주세요.");
-        },
+  const handleSaveEdit = useCallback(
+    (commentId: number) => {
+      if (!editText.trim()) {
+        alert("댓글 내용을 입력해주세요.");
+        return;
       }
-    );
-  };
 
-  const handleCancelEdit = () => {
+      patchMutate(
+        {
+          lpId,
+          commentId,
+          content: editText,
+        },
+        {
+          onSuccess: () => {
+            setEditingCommentId(null);
+            setEditText("");
+          },
+          onError: () => {
+            alert("댓글 수정에 실패했습니다. 다시 시도해주세요.");
+          },
+        }
+      );
+    },
+    [editText, lpId, patchMutate]
+  );
+
+  const handleCancelEdit = useCallback(() => {
     setEditingCommentId(null);
     setEditText("");
-  };
+  }, []);
 
-  const handleDeleteClick = (lpId: number, commentId: number) => {
-    deleteMutate(
-      { lpId, commentId },
-      {
-        onSuccess: () => {
-          alert("댓글이 삭제되었습니다.");
-        },
-        onError: () => {
-          alert("댓글 삭제도중 문제가 발생하였습니다...");
-        },
-      }
-    );
-  };
+  const handleDeleteClick = useCallback(
+    (lpId: number, commentId: number) => {
+      deleteMutate(
+        { lpId, commentId },
+        {
+          onSuccess: () => {
+            alert("댓글이 삭제되었습니다.");
+          },
+          onError: () => {
+            alert("댓글 삭제도중 문제가 발생하였습니다...");
+          },
+        }
+      );
+    },
+    [deleteMutate]
+  );
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetching) {

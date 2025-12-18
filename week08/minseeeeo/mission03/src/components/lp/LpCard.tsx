@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import type { LpItem } from "../../types/lp";
 import { useNavigate } from "react-router-dom";
 import { calculateTimeAgo } from "../../utils/time";
@@ -43,4 +43,4 @@ const LpCard = ({ lp }: LpCardProps) => {
   );
 };
 
-export default LpCard;
+export default memo(LpCard);
