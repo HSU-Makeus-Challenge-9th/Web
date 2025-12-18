@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Movie {
   id: number;
@@ -18,14 +19,27 @@ interface MovieCardProps {
 }
 
 export const MovieCard = memo(({ movie, onClick }: MovieCardProps) => {
+  const navigate = useNavigate();
+  
   const posterUrl = movie.poster_path 
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : 'https://via.placeholder.com/500x750?text=No+Image';
 
+  const handleClick = (e: React.MouseEvent) => {
+    // Ctrl/Cmd + 클릭 = 상세 페이지로 이동
+    if (e.ctrlKey || e.metaKey) {
+      navigate(`/movies/${movie.id}`);
+    }
+    // 일반 클릭 = 모달
+    else {
+      onClick(movie);
+    }
+  };
+
   return (
     <div 
       className="overflow-hidden rounded-lg bg-white shadow-md transition-transform hover:scale-105 cursor-pointer"
-      onClick={() => onClick(movie)}
+      onClick={handleClick}
     >
       <img src={posterUrl} alt={movie.title} className="h-auto w-full object-cover" />
       <div className="p-4">
