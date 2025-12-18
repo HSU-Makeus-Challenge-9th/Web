@@ -1,16 +1,11 @@
-export type TmdbMovieResult = {
+export type Movie = {
   id: number;
   title: string;
   overview: string;
-  poster_path: string | null;
-  release_date: string;
-  vote_average: number;
-  adult: boolean;
-};
-
-export type TmdbSearchResponse = {
-  page: number;
-  results: TmdbMovieResult[];
-  total_pages: number;
-  total_results: number;
+  posterUrl: string;
+  backdropUrl?: string;
+  releaseDate: string;
+  voteAverage: number;
+  voteCount?: number;
+  isAdult?: boolean;
 };
