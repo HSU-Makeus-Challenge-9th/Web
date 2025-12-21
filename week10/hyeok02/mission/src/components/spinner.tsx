@@ -1,0 +1,10 @@
+const Spinner = () => {
+    return (
+      <div className="flex justify-center items-center py-10">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-pink-400 border-solid"></div>
+      </div>
+    );
+  };
+  
+  export default Spinner;
+  
