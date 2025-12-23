@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@keyframes lp-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-lp-rotate {
+  animation: lp-rotate 10s linear infinite;
+}
