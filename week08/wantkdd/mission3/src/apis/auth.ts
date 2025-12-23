@@ -28,12 +28,12 @@ export const deleteUser = async (): Promise<void> => {
 
 export const getUserMe = async (): Promise<User> => {
   const response = await PrivateAPI.get<ApiResponse<User>>('/users/me');
-  return response.data;
+  return response.data.data;
 };
 
 export const updateUser = async (
   data: UpdateUserRequest
 ): Promise<User> => {
   const response = await PrivateAPI.patch<ApiResponse<User>>('/users', data);
-  return response.data;
+  return response.data.data;
 };

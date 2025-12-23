@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { User } from 'lucide-react';
 import type { Comment } from '../../../../types/comment';
 import { useAuthStore } from '../../../../store/authStore';
@@ -23,15 +23,15 @@ const CommentItem = ({ comment, lpId }: CommentItemProps) => {
 
   const isAuthor = user?.id === comment.authorId;
 
-  const handleEdit = () => {
+  const handleEdit = useCallback(() => {
     setIsEditing(true);
-  };
+  }, []);
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setIsEditing(false);
-  };
+  }, []);
 
-  const handleSaveEdit = (content: string) => {
+  const handleSaveEdit = useCallback((content: string) => {
     updateCommentMutation(
       {
         lpId,
@@ -44,14 +44,14 @@ const CommentItem = ({ comment, lpId }: CommentItemProps) => {
         },
       }
     );
-  };
+  }, [updateCommentMutation, lpId, comment.id]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     deleteCommentMutation({
       lpId,
       commentId: comment.id,
     });
-  };
+  }, [deleteCommentMutation, lpId, comment.id]);
 
   return (
     <div className="flex gap-3 lg:gap-4 py-4 border-b border-gray-700">
@@ -93,4 +93,4 @@ const CommentItem = ({ comment, lpId }: CommentItemProps) => {
   );
 };
 
-export default CommentItem;
+export default memo(CommentItem);

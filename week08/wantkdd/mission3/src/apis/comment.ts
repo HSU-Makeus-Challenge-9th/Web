@@ -23,7 +23,7 @@ export const getLpComments = async ({
       params: { cursor, limit, order },
     }
   );
-  return response.data;
+  return response.data.data;
 };
 
 // 댓글 작성
