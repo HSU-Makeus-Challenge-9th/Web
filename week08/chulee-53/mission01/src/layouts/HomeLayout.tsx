@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
 import FloatingButton from "../components/FloatingButton";
 
 const HomeLayout = () => {
@@ -38,7 +37,7 @@ const HomeLayout = () => {
   return (
     <div className="h-dvh flex flex-col bg-neutral-950 text-white">
       <nav className="h-20">
-        <Navbar onSidebarToggle={() => setIsSidebarOpen((prev) => !prev)} />
+        <Navbar />
       </nav>
       <div className="flex flex-1 overflow-hidden ">
         <aside
@@ -47,7 +46,6 @@ const HomeLayout = () => {
             isSidebarOpen ? "block w-[200px]" : "hidden"
           } overflow-hidden`}
         >
-          <Sidebar />
         </aside>
 
         <main className="flex-1 overflow-y-auto p-6">
