@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import NotFoundPage from "./NotFoundPage";
 import type { PAGINATION_ORDER } from "../types/common";
@@ -46,7 +46,6 @@ const HomePage = () => {
     hasNextPage: hasNextPageTitle,
     fetchNextPage: fetchNextPageTitle,
   } = useGetInfiniteLpList(
-    0,
     10,
     searchType === "title" ? debouncedSearchQuery : "",
     order
@@ -66,13 +65,27 @@ const HomePage = () => {
     order
   );
 
-  // 현재 검색 타입에 따라 사용할 데이터 선택
-  const lps = searchType === "tag" ? lpsByTag : lpsByTitle;
-  const isFetching = searchType === "tag" ? isFetchingTag : isFetchingTitle;
-  const isError = searchType === "tag" ? isErrorTag : isErrorTitle;
-  const hasNextPage = searchType === "tag" ? hasNextPageTag : hasNextPageTitle;
-  const fetchNextPage =
-    searchType === "tag" ? fetchNextPageTag : fetchNextPageTitle;
+  // 현재 검색 타입에 따라 사용할 데이터 선택 (useMemo)
+  const lps = useMemo(
+    () => (searchType === "tag" ? lpsByTag : lpsByTitle),
+    [searchType, lpsByTag, lpsByTitle]
+  );
+  const isFetching = useMemo(
+    () => (searchType === "tag" ? isFetchingTag : isFetchingTitle),
+    [searchType, isFetchingTag, isFetchingTitle]
+  );
+  const isError = useMemo(
+    () => (searchType === "tag" ? isErrorTag : isErrorTitle),
+    [searchType, isErrorTag, isErrorTitle]
+  );
+  const hasNextPage = useMemo(
+    () => (searchType === "tag" ? hasNextPageTag : hasNextPageTitle),
+    [searchType, hasNextPageTag, hasNextPageTitle]
+  );
+  const fetchNextPage = useMemo(
+    () => (searchType === "tag" ? fetchNextPageTag : fetchNextPageTitle),
+    [searchType, fetchNextPageTag, fetchNextPageTitle]
+  );
 
   const { ref, inView } = useInView({
     threshold: 0,
@@ -95,12 +108,15 @@ const HomePage = () => {
     }
   }, [inView, hasNextPage, isFetching, throttledFetchNextPage]);
 
-  // 검색 핸들러
-  const handleSearch = (query: string, type: "title" | "tag") => {
-    setSearchQuery(query);
-    setSearchType(type);
-    toggleSearchModal();
-  };
+  // 검색 핸들러 (useCallback)
+  const handleSearch = useCallback(
+    (query: string, type: "title" | "tag") => {
+      setSearchQuery(query);
+      setSearchType(type);
+      toggleSearchModal();
+    },
+    [toggleSearchModal]
+  );
 
   return (
     <div className="relative">

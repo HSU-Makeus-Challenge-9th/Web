@@ -2,7 +2,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { getLpList } from "../../apis/lp";
 
 function useGetInfiniteLpList(
-  cursor: number,
   limit?: number,
   search?: string,
   order?: "asc" | "desc"
